@@ -43,12 +43,12 @@
             100% { transform: scale(1); filter: brightness(1); }
         }
         @keyframes floatUpLong {
-            0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
-            70% { opacity: 1; transform: translateY(-50px) scale(1.1) rotate(2deg); }
-            100% { opacity: 0; transform: translateY(-85px) scale(1.2) rotate(4deg); }
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            70% { opacity: 1; transform: translateY(-45px) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.15); }
         }
-        .floating-dmg { animation: floatUpLong 1.6s ease-out forwards; pointer-events: none; text-shadow: 0 0 8px rgba(0, 240, 255, 0.6); }
-        .floating-skill-text { animation: floatUpLong 1.6s ease-out forwards; pointer-events: none; font-weight: 900; text-shadow: 0 0 10px rgba(0,0,0,0.8); z-index: 50; }
+        .floating-dmg { animation: floatUpLong 1.4s ease-out forwards; pointer-events: none; font-weight: 900; font-size: 1.2rem; text-shadow: 0 0 10px rgba(0, 240, 255, 0.8); }
+        .floating-skill-text { animation: floatUpLong 1.4s ease-out forwards; pointer-events: none; font-weight: 900; font-size: 0.95rem; white-space: nowrap; text-shadow: 0 0 10px rgba(0,0,0,0.9); z-index: 50; }
         .tooltip-container { position: relative; }
         .tooltip-container:hover .tooltip-box { visibility: visible; opacity: 1; pointer-events: auto; }
         .tooltip-box { visibility: hidden; opacity: 0; transition: opacity 0.15s ease-in-out; z-index: 99999; pointer-events: none; }
@@ -62,7 +62,7 @@
 </head>
 <body class="h-full flex flex-col justify-between game-gradient overflow-hidden">
 
-    <!-- MODAL CIBERPUNK SILENCIOSO / CRÍTICO -->
+    <!-- MODAL CIBERPUNK -->
     <div id="cyber-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
         <div class="max-w-xs w-full bg-cyber-panel border border-cyber-neonCyan rounded-2xl p-4 shadow-neon-cyan text-center relative">
             <div id="modal-icon" class="text-3xl mb-2 text-cyber-neonYellow">⚠️</div>
@@ -82,7 +82,7 @@
                     <i class="fa-solid fa-cat text-2xl text-cyber-neonCyan animate-pulse"></i>
                 </div>
                 <h1 class="font-orbitron text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-cyber-neonCyan via-cyber-neonPink to-cyber-neonYellow tracking-wider">Wizzcat Clicker</h1>
-                <p class="text-[8px] text-slate-400 mt-0.5 uppercase tracking-widest font-semibold font-orbitron">Cybernetic Autonomous Edition v14.0</p>
+                <p class="text-[8px] text-slate-400 mt-0.5 uppercase tracking-widest font-semibold font-orbitron">Cybernetic Autonomous Edition v17.5</p>
             </div>
 
             <div id="auth-error-box" class="hidden mb-2.5 p-2 bg-red-950/80 border border-red-500/50 rounded-xl text-red-300 text-[11px] text-center font-medium animate-bounce"></div>
@@ -96,6 +96,10 @@
                     <label class="block text-[10px] font-semibold text-slate-300 uppercase tracking-wider mb-0.5 font-orbitron">Contraseña</label>
                     <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-cyber-bg border border-cyber-border focus:border-cyber-neonCyan rounded-xl px-3 py-2 text-xs text-slate-100 outline-none transition">
                 </div>
+                <div class="flex items-center space-x-2 py-0.5">
+                    <input type="checkbox" id="auth-remember" class="w-3.5 h-3.5 accent-cyber-neonCyan bg-cyber-bg border-cyber-border rounded cursor-pointer">
+                    <label for="auth-remember" class="text-[10px] text-slate-300 font-orbitron cursor-pointer">Recordar usuario y sesión</label>
+                </div>
                 <div class="grid grid-cols-2 gap-2 pt-1">
                     <button onclick="handleLogin()" class="w-full py-2 bg-gradient-to-r from-cyber-neonCyan to-cyber-neonPink hover:opacity-90 text-black font-orbitron font-bold rounded-xl text-xs shadow-neon-cyan transition active:scale-95">Iniciar Sesión</button>
                     <button onclick="handleRegister()" class="w-full py-2 bg-cyber-bg hover:bg-cyber-border text-cyber-neonCyan border border-cyber-border font-orbitron font-bold rounded-xl text-xs transition active:scale-95">Crear Cuenta</button>
@@ -106,7 +110,7 @@
 
     <!-- HERO SELECTION SCREEN -->
     <div id="hero-select-screen" class="fixed inset-0 z-40 bg-[#05050a]/95 backdrop-blur-md flex items-center justify-center p-3 hidden overflow-y-auto">
-        <div class="max-w-md w-full bg-cyber-panel border border-cyber-border rounded-2xl p-3.5 shadow-2xl">
+        <div class="max-w-md w-full bg-cyber-panel border border-cyber-border rounded-2xl p-3.5 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-3">
                 <div>
                     <h2 class="font-orbitron text-sm font-bold text-cyber-neonCyan">Selección de Personajes</h2>
@@ -127,10 +131,15 @@
                     </div>
                     <div>
                         <label class="block text-[9px] text-slate-400 mb-0.5">Clase y Habilidad Inicial</label>
+                        <div class="grid grid-cols-3 gap-1 mb-1.5">
+                            <button type="button" onclick="selectClass('PromptEngineer')" id="class-btn-PromptEngineer" class="class-btn p-1.5 rounded-xl border border-cyber-neonCyan bg-cyber-neonCyan/20 text-cyber-neonCyan text-[8px] font-bold font-orbitron transition text-center truncate">Prompt Engineer</button>
+                            <button type="button" onclick="selectClass('AISwarmMaster')" id="class-btn-AISwarmMaster" class="class-btn p-1.5 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[8px] font-bold font-orbitron transition text-center truncate">AISwarm Master</button>
+                            <button type="button" onclick="selectClass('QuantumArchitect')" id="class-btn-QuantumArchitect" class="class-btn p-1.5 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[8px] font-bold font-orbitron transition text-center truncate">Quantum Architect</button>
+                        </div>
                         <div class="grid grid-cols-3 gap-1">
-                            <button type="button" onclick="selectClass('PromptEngineer')" id="class-btn-PromptEngineer" class="class-btn p-1.5 rounded-xl border border-cyber-neonCyan bg-cyber-neonCyan/20 text-cyber-neonCyan text-[9px] font-bold font-orbitron transition text-center">Prompt<span class="block text-[7px] text-slate-400 font-normal">Inyección</span></button>
-                            <button type="button" onclick="selectClass('AISwarmMaster')" id="class-btn-AISwarmMaster" class="class-btn p-1.5 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[9px] font-bold font-orbitron transition text-center">AISwarm<span class="block text-[7px] text-slate-500 font-normal">Enjambre</span></button>
-                            <button type="button" onclick="selectClass('QuantumArchitect')" id="class-btn-QuantumArchitect" class="class-btn p-1.5 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[9px] font-bold font-orbitron transition text-center">Quantum<span class="block text-[7px] text-slate-500 font-normal">Pulso</span></button>
+                            <button type="button" onclick="selectClass('CyberSamurai')" id="class-btn-CyberSamurai" class="class-btn p-1.5 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[8px] font-bold font-orbitron transition text-center truncate">Cyber Samurai</button>
+                            <button type="button" onclick="selectClass('NeuralHacker')" id="class-btn-NeuralHacker" class="class-btn p-1.5 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[8px] font-bold font-orbitron transition text-center truncate">Neural Hacker</button>
+                            <button type="button" onclick="selectClass('VoidWeaver')" id="class-btn-VoidWeaver" class="class-btn p-1.5 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[8px] font-bold font-orbitron transition text-center truncate">Void Weaver</button>
                         </div>
                         <div id="class-description-box" class="mt-1.5 p-1.5 bg-cyber-bg rounded-lg border border-cyber-border text-[10px] text-slate-300 leading-relaxed"></div>
                     </div>
@@ -245,15 +254,17 @@
                         </div>
                     </div>
 
-                    <div id="boss-minigame-box" class="hidden mb-1.5 p-1.5 bg-purple-950/90 border border-cyber-neonPurple rounded-lg relative h-[55px] flex flex-col justify-center items-center">
+                    <!-- BOSS ANNOUNCEMENT & MINIGAME -->
+                    <div id="boss-announcement-banner" class="hidden mb-1 p-1 bg-amber-950/90 border border-amber-500 rounded text-center text-[9px] font-bold text-amber-300 font-orbitron animate-pulse"></div>
+                    <div id="boss-minigame-box" class="hidden mb-1.5 p-1.5 bg-purple-950/90 border border-cyber-neonPurple rounded-lg relative h-[65px] flex flex-col justify-center items-center">
                         <div id="minigame-title" class="text-center text-[8px] font-bold text-cyber-neonYellow font-orbitron">🛡️ MECÁNICA DE JEFE</div>
                         <div id="minigame-content" class="flex items-center justify-center space-x-1 mt-0.5"></div>
                     </div>
 
                     <div id="enemy-hp-wrapper" class="hidden">
-                        <div class="w-full bg-cyber-bg h-3 rounded-full overflow-hidden p-0.25 border border-cyber-border relative shadow-inner mb-0.5">
+                        <div class="w-full bg-cyber-bg h-4 rounded-full overflow-hidden p-0.5 border border-cyber-border relative shadow-inner mb-0.5">
                             <div id="enemy-hp-bar" class="bg-gradient-to-r from-cyber-neonPink to-cyber-neonCyan h-full rounded-full transition-all duration-150" style="width: 100%;"></div>
-                            <div class="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-slate-950 drop-shadow">
+                            <div class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-slate-950 drop-shadow">
                                 <span id="enemy-hp-text" class="text-white font-orbitron">50 / 50</span>
                             </div>
                         </div>
@@ -261,7 +272,7 @@
                     <p id="enemy-lore" class="text-[8px] text-slate-400 italic text-center truncate">Centro de control orbital.</p>
                 </div>
 
-                <!-- ZONA DE BATALLA / CLIC DE PROMPT -->
+                <!-- ZONA DE BATALLA -->
                 <div id="battle-click-zone" class="relative py-1 flex items-center justify-center hidden shrink-0">
                     <button id="tap-target-btn" onclick="handleTap(event)" class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-cyber-panel via-cyber-border to-cyber-bg border-4 border-cyber-neonCyan shadow-neon-cyan flex items-center justify-center active:scale-95 transition cursor-pointer relative group">
                         <div class="absolute inset-2 rounded-full border border-cyber-neonPink opacity-50 animate-ping"></div>
@@ -321,7 +332,7 @@
                 <div id="skill-subtabs-container" class="grid grid-cols-3 gap-1 bg-cyber-bg p-0.5 rounded-lg border border-cyber-border shrink-0"></div>
 
                 <div class="relative bg-cyber-panel border border-cyber-border rounded-xl flex-1 min-h-[140px] overflow-hidden cursor-grab active:cursor-grabbing" id="skill-tree-viewport">
-                    <div id="skill-tree-canvas" class="absolute w-[2600px] h-[1200px] transition-transform duration-75 origin-top-left" style="transform: translate(-50px, -50px) scale(0.7);">
+                    <div id="skill-tree-canvas" class="absolute w-[3600px] h-[1600px] transition-transform duration-75 origin-top-left" style="transform: translate(-50px, -50px) scale(0.6);">
                         <svg id="skill-svg-lines" class="absolute inset-0 w-full h-full pointer-events-none z-0"></svg>
                         <div id="skill-nodes-container" class="absolute inset-0 z-10"></div>
                     </div>
@@ -355,10 +366,33 @@
 
             <!-- TAB 5: SHARDS -->
             <div id="tab-content-ShardShop" class="tab-pane hidden flex flex-col space-y-2 overflow-y-auto h-full pr-1">
-                <div class="bg-cyber-panel border border-cyber-neonCyan rounded-xl p-2.5 shadow-neon-cyan relative overflow-hidden">
-                    <h3 class="font-orbitron text-xs font-bold text-cyber-neonCyan mb-0.5">Mejoras de Shards (<i class="fa-solid fa-microchip"></i>)</h3>
-                    <p class="text-[10px] text-slate-400 mb-2">Impacto masivo para desatar el poder definitivo.</p>
-                    <div id="shard-shop-list" class="space-y-1 text-left max-h-[220px] overflow-y-auto pr-1"></div>
+                <div class="flex justify-between items-center bg-cyber-panel border border-cyber-border rounded-xl p-1.5 shrink-0">
+                    <h3 class="font-orbitron font-bold text-cyber-neonCyan text-xs">Centro de Shards</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <button onclick="switchShardTab('shop')" id="shard-subtab-shop" class="px-2 py-0.5 bg-cyber-neonCyan text-black rounded text-[9px] font-bold font-orbitron">Mejoras</button>
+                        <button onclick="switchShardTab('exchange')" id="shard-subtab-exchange" class="px-2 py-0.5 bg-cyber-bg text-slate-400 rounded text-[9px] font-bold font-orbitron">Canje Hype</button>
+                    </div>
+                </div>
+
+                <div id="shard-subcontent-shop" class="space-y-1.5">
+                    <div class="bg-cyber-panel border border-cyber-neonCyan rounded-xl p-2.5 shadow-neon-cyan relative overflow-hidden">
+                        <p class="text-[10px] text-slate-400 mb-2">Impacto masivo para desatar el poder definitivo con microchips.</p>
+                        <div id="shard-shop-list" class="space-y-1 text-left max-h-[220px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+
+                <div id="shard-subcontent-exchange" class="space-y-1.5 hidden">
+                    <div class="bg-cyber-panel border border-cyber-neonCyan rounded-xl p-3 shadow-neon-cyan relative overflow-hidden text-center space-y-3">
+                        <div class="inline-block p-2 rounded-full bg-cyber-neonCyan/10 border border-cyber-neonCyan/30">
+                            <i class="fa-solid fa-microchip text-xl text-cyber-neonCyan animate-pulse"></i>
+                        </div>
+                        <h3 class="font-orbitron text-xs font-bold text-cyber-neonYellow">Canjeador de Hype por Shards</h3>
+                        <p class="text-[10px] text-slate-300">Obtén microchips directamente a cambio de tu Hype acumulado en las incursiones.</p>
+                        <div class="flex items-center space-x-2 pt-2">
+                            <button onclick="buyShardWithHype(1)" class="flex-1 py-2 bg-cyber-bg hover:bg-cyber-border border border-cyber-border text-cyber-neonCyan rounded-xl text-[10px] font-orbitron font-bold shadow">1 Shard (<span id="cost-hype-1">5000</span> Hype)</button>
+                            <button onclick="buyShardWithHype(5)" class="flex-1 py-2 bg-cyber-bg hover:bg-cyber-border border border-cyber-border text-cyber-neonCyan rounded-xl text-[10px] font-orbitron font-bold shadow">5 Shards (<span id="cost-hype-5">24000</span> Hype)</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -397,7 +431,6 @@
             <!-- TAB 8: RANKINGS -->
             <div id="tab-content-Global" class="tab-pane hidden flex flex-col space-y-2 overflow-y-auto h-full pr-1">
                 <h3 class="font-orbitron font-bold text-cyber-neonCyan text-xs mb-0.5">Rankings Globales</h3>
-                <p class="text-[9px] text-slate-400 mb-1.5">Identificado por nombre de personaje.</p>
                 <div class="bg-cyber-panel border border-cyber-border rounded-xl p-2">
                     <div id="global-ranking-list" class="space-y-1 text-xs">
                         <div class="text-center text-slate-500 py-2 font-orbitron text-[10px]">Cargando ranking...</div>
@@ -405,43 +438,89 @@
                 </div>
             </div>
 
+            <!-- TAB 9: HOW TO PLAY? -->
+            <div id="tab-content-HowToPlay" class="tab-pane hidden flex flex-col space-y-2 overflow-y-auto h-full pr-1 text-xs text-slate-300">
+                <div class="bg-cyber-panel border border-cyber-neonCyan rounded-xl p-3 shadow-neon-cyan space-y-2.5">
+                    <h3 class="font-orbitron font-bold text-cyber-neonCyan text-sm text-center mb-1">📖 Guía de Wizzcat Clicker</h3>
+                    
+                    <div class="space-y-2 text-[10px] leading-relaxed">
+                        <div class="p-2 bg-cyber-bg rounded-lg border border-cyber-border">
+                            <strong class="text-cyber-neonYellow block mb-0.5 font-orbitron">🚀 ¿De qué va el juego?</strong>
+                            Eres un ingeniero/arquitecto cibernético que debe atravesar sectores orbitales infectados ejecutando prompts y habilidades, eliminando subrutinas hostiles y jefes de red.
+                        </div>
+
+                        <div class="p-2 bg-cyber-bg rounded-lg border border-cyber-border">
+                            <strong class="text-[#f3e600] block mb-0.5 font-orbitron">💰 Monedas y Divisas</strong>
+                            <ul class="list-disc list-inside space-y-0.5 text-slate-300">
+                                <li><strong>Hype:</strong> Divisa digital obtenida derrotando enemigos y mediante pasivas. Sirve para mejoras, reparaciones y canjes.</li>
+                                <li><strong>Shards (Microchips):</strong> Divisa de prestigio obtenida al hacer Singularidades o canjeándola por Hype. Permite comprar mejoras masivas permanentes.</li>
+                            </ul>
+                        </div>
+
+                        <div class="p-2 bg-cyber-bg rounded-lg border border-cyber-border">
+                            <strong class="text-cyber-neonPink block mb-0.5 font-orbitron">⚡ Subida de Nivel y Árbol de Skills</strong>
+                            Al derrotar enemigos ganas EXP. Al subir de nivel obtienes <strong>Puntos de Algoritmo</strong> para desbloquear nodos pasivos y habilidades activas únicas en tu árbol de habilidades ramificado.
+                        </div>
+
+                        <div class="p-2 bg-cyber-bg rounded-lg border border-cyber-border">
+                            <strong class="text-purple-400 block mb-0.5 font-orbitron">🛡️ Mecánicas de Jefes (Nodo 10)</strong>
+                            Los jefes de cada sector activan minijuegos interactivos de defensa (ordenar nodos, sincronizadores dinámicos, cálculos o desactivación de hacks) antes de poder derrotarlos.
+                        </div>
+
+                        <div class="p-2 bg-cyber-bg rounded-lg border border-cyber-border">
+                            <strong class="text-red-400 block mb-0.5 font-orbitron">⚠️ ¿Qué pasa al perder o ir a la Nave?</strong>
+                            Si se agota el tiempo en un nodo o mueres, regresas a la nave con una penalización porcentual de Hype y EXP. Retirarse voluntariamente a la nave es seguro.
+                        </div>
+
+                        <div class="p-2 bg-cyber-bg rounded-lg border border-cyber-border">
+                            <strong class="text-cyber-neonPurple block mb-0.5 font-orbitron">⚛️ Rebirth (Singularidad)</strong>
+                            Al alcanzar el Nivel 100, puedes reiniciar tu red para ganar Shards de prestigio e iniciar un nuevo ciclo con bonificadores estelares.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
 
         <!-- NAVIGATION TABS BAR -->
-        <nav class="bg-cyber-panel border border-cyber-border rounded-xl p-1 grid grid-cols-8 gap-0.5 shadow-2xl mt-1 shrink-0">
+        <nav class="bg-cyber-panel border border-cyber-border rounded-xl p-1 grid grid-cols-9 gap-0.5 shadow-2xl mt-1 shrink-0">
             <button onclick="switchTab('Batalla')" id="nav-btn-Batalla" class="nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-cyber-neonCyan bg-cyber-border border border-cyber-neonCyan/40 transition relative">
                 <span id="nav-tab-icon" class="text-xs">🛸</span>
-                <span id="nav-tab-label" class="text-[6px] font-bold mt-0.25 font-orbitron">Nave</span>
+                <span id="nav-tab-label" class="text-[5px] font-bold mt-0.25 font-orbitron">Nave</span>
             </button>
             <button onclick="switchTab('Torre')" id="nav-btn-Torre" class="nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-600 cursor-not-allowed transition relative" disabled>
                 <span class="text-xs">🌐</span>
-                <span class="text-[6px] font-bold mt-0.25 font-orbitron">Sectores</span>
+                <span class="text-[5px] font-bold mt-0.25 font-orbitron">Sectores</span>
             </button>
             <button onclick="switchTab('Skills')" id="nav-btn-Skills" class="nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400 hover:text-white transition relative">
                 <span class="text-xs">🧬</span>
-                <span class="text-[6px] font-bold mt-0.25 font-orbitron">Skills</span>
+                <span class="text-[5px] font-bold mt-0.25 font-orbitron">Skills</span>
                 <span id="badge-Skills" class="hidden absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-cyber-neonPink text-white rounded-full text-[6px] font-bold flex items-center justify-center animate-pulse">!</span>
             </button>
             <button onclick="switchTab('Mejoras')" id="nav-btn-Mejoras" class="nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400 hover:text-white transition relative">
                 <span class="text-xs">💻</span>
-                <span class="text-[6px] font-bold mt-0.25 font-orbitron">Mejoras</span>
+                <span class="text-[5px] font-bold mt-0.25 font-orbitron">Mejoras</span>
             </button>
             <button onclick="switchTab('ShardShop')" id="nav-btn-ShardShop" class="nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400 hover:text-white transition relative">
                 <span class="text-xs">💎</span>
-                <span class="text-[6px] font-bold mt-0.25 font-orbitron">Shards</span>
+                <span class="text-[5px] font-bold mt-0.25 font-orbitron">Shards</span>
             </button>
             <button onclick="switchTab('Rebirth')" id="nav-btn-Rebirth" class="nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400 hover:text-white transition relative">
                 <span class="text-xs">⚛️</span>
-                <span class="text-[6px] font-bold mt-0.25 font-orbitron">Prestige</span>
+                <span class="text-[5px] font-bold mt-0.25 font-orbitron">Prestige</span>
             </button>
             <button onclick="switchTab('Logros')" id="nav-btn-Logros" class="nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400 hover:text-white transition relative">
                 <span class="text-xs">🏆</span>
-                <span class="text-[6px] font-bold mt-0.25 font-orbitron">Logros</span>
+                <span class="text-[5px] font-bold mt-0.25 font-orbitron">Logros</span>
                 <span id="badge-Logros" class="hidden absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-cyber-neonPink text-white rounded-full text-[6px] font-bold flex items-center justify-center animate-pulse">!</span>
             </button>
             <button onclick="switchTab('Global')" id="nav-btn-Global" class="nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400 hover:text-white transition relative">
                 <span class="text-xs">📊</span>
-                <span class="text-[6px] font-bold mt-0.25 font-orbitron">Ranking</span>
+                <span class="text-[5px] font-bold mt-0.25 font-orbitron">Ranking</span>
+            </button>
+            <button onclick="switchTab('HowToPlay')" id="nav-btn-HowToPlay" class="nav-btn flex flex-col items-center justify-center py-1 rounded-lg text-slate-400 hover:text-white transition relative">
+                <span class="text-xs">❓</span>
+                <span class="text-[5px] font-bold mt-0.25 font-orbitron">Guía</span>
             </button>
         </nav>
 
@@ -479,9 +558,12 @@
         let minigameState = {};
         let activeSkillSubTab = 0;
         let activeUpgradeSubTab = 'hardware';
+        let activeShardSubTab = 'shop';
         let activeSelectingSlot = -1;
 
-        let treeScale = 0.7;
+        let activeDotsList = [];
+
+        let treeScale = 0.6;
         let treeTranslateX = 0;
         let treeTranslateY = 0;
         let isPanning = false;
@@ -489,29 +571,23 @@
 
         let skillCooldowns = {};
 
-        const playlist = ['music1.mp3', 'music2.mp3', 'music3.mp3'];
+        let playlist = ['music1.mp3', 'music2.mp3', 'music3.mp3'];
         let currentTrackIndex = 0;
         let isShuffle = false;
         let isPlayingMusic = false;
 
         const sectorNames = [
-            "Nave Orbital",
-            "Sector 1",
-            "Sector 2",
-            "Sector 3",
-            "Sector 4",
-            "Sector 5",
-            "Sector 6",
-            "Sector 7",
-            "Sector 8",
-            "Sector 9",
-            "Sector 10"
+            "Nave Orbital", "Sector 1", "Sector 2", "Sector 3", "Sector 4",
+            "Sector 5", "Sector 6", "Sector 7", "Sector 8", "Sector 9", "Sector 10"
         ];
 
         const classDescriptions = {
-            PromptEngineer: "Especializado en <span style='color: #ff007f; font-weight: bold;'>daño crítico</span> y velocidad de prompts. <br><br><b>Habilidad Inicial:</b> <span style='color: #00f0ff;'>Inyección Rápida</span>.",
+            PromptEngineer: "Especializado en <span style='color: #ff007f; font-weight: bold;'>daño crítico</span> y velocidad de prompts.<br><br><b>Habilidad Inicial:</b> <span style='color: #00f0ff;'>Inyección Rápida</span>.",
             AISwarmMaster: "Enfocado en <span style='color: #ff007f;'>daño sostenido (DOTs)</span> y enjambres autónomos.<br><br><b>Habilidad Inicial:</b> <span style='color: #00f0ff;'>Protocolo Enjambre</span>.",
-            QuantumArchitect: "Perfil defensivo con <span style='color: #ff007f;'>reducción de CD</span> y reparación mejorada.<br><br><b>Habilidad Inicial:</b> <span style='color: #00f0ff;'>Pulso Estabilizador</span>."
+            QuantumArchitect: "Perfil defensivo con <span style='color: #ff007f;'>reducción de CD</span> y reparación mejorada.<br><br><b>Habilidad Inicial:</b> <span style='color: #00f0ff;'>Pulso Estabilizador</span>.",
+            CyberSamurai: "Maestro del filo cibernético con altísimo <span style='color: #ff007f;'>daño de click y sangrado</span>.<br><br><b>Habilidad Inicial:</b> <span style='color: #00f0ff;'>Corte de Plasma</span>.",
+            NeuralHacker: "Experto en infiltración que drena recursos y causa <span style='color: #ff007f;'>interrupciones críticas</span>.<br><br><b>Habilidad Inicial:</b> <span style='color: #00f0ff;'>Backdoor Neural</span>.",
+            VoidWeaver: "Manipulador del vacío estelar con poderoso <span style='color: #ff007f;'>daño de área en el tiempo</span>.<br><br><b>Habilidad Inicial:</b> <span style='color: #00f0ff;'>Singularidad Oscura</span>."
         };
 
         const classDefinitions = {
@@ -523,50 +599,34 @@
                     {
                         name: 'Overclock Click',
                         nodes: [
-                            {id:'pe1', name:'Prompt Base', max:5, cost:1, req: {points:0}, desc:'+12 <span style="color:#ff007f;">daño</span> de click.', x: 50, y: 200, children: ['pe2', 'pe5'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'pe2', name:'Inyección SQL', max:5, cost:1, req: {node:'pe1', count:3}, desc:'+25 <span style="color:#ff007f;">daño</span> de click.', x: 250, y: 100, children: ['pe4'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'pe5', name:'Zero Day', max:5, cost:1, req: {node:'pe1', count:3}, desc:'+5% Prob. <span style="color:#ff007f;">Crítico</span>.', x: 250, y: 300, children: ['pe3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe3', name:'Buffer Intermedio', max:5, cost:1, req: {node:'pe5', count:3}, desc:'Activa: Inflige <span style="color:#00f0ff;">1.5x</span> del <span style="color:#ff007f;">daño de click</span>.', x: 450, y: 300, children: ['pe6'], type:'active', cd: 10, mult: 1.5, stat: 'damage', colorType: 'cyan', effect:'active_quick', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe4', name:'Kernel Panic', max:5, cost:1, req: {node:'pe2', count:3}, desc:'+45 <span style="color:#ff007f;">daño crítico</span>.', x: 450, y: 100, children: ['pe6'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe6', name:'Root Access', max:5, cost:1, req: {node:'pe4', count:3}, desc:'+80 <span style="color:#ff007f;">daño</span> de click.', x: 650, y: 200, children: ['pe20', 'pe21'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'pe20', name:'Deep Inject', max:5, cost:1, req: {node:'pe6', count:3}, desc:'+120 <span style="color:#ff007f;">daño</span> de click.', x: 850, y: 100, children: ['pe22'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'pe21', name:'Neural Tap', max:5, cost:1, req: {node:'pe6', count:3}, desc:'Activa: Choque que inflige <span style="color:#00f0ff;">2.2x</span> del <span style="color:#ff007f;">daño de click</span>.', x: 850, y: 300, children: ['pe23'], type:'active', cd: 8, mult: 2.2, stat: 'damage', colorType: 'pink', effect:'neural_shock', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe22', name:'Cyber Breach', max:5, cost:1, req: {node:'pe20', count:3}, desc:'+180 <span style="color:#ff007f;">daño</span> de click.', x: 1050, y: 100, children: ['pe24'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'pe23', name:'Overload Core', max:5, cost:1, req: {node:'pe21', count:3}, desc:'+15% <span style="color:#ff007f;">Crit Dmg</span>.', x: 1050, y: 300, children: ['pe24'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'pe24', name:'Matrix Strike', max:5, cost:1, req: {node:'pe22', count:3}, desc:'+250 <span style="color:#ff007f;">daño</span> de click.', x: 1250, y: 200, children: ['pe7'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'pe7', name:'Sobrecarga', max:5, cost:1, req: {node:'pe24', count:3}, desc:'Activa: Pulso masivo de <span style="color:#00f0ff;">4.5x</span> del <span style="color:#ff007f;">daño crítico</span>.', x: 1450, y: 200, children: [], type:'active', cd: 15, mult: 4.5, stat: 'crit', colorType: 'cyan', effect:'crit_burst', shape:'star', color:'border-cyber-neonCyan'}
+                            {id:'pe1', name:'Prompt Base', max:5, cost:1, req:{points:0}, baseVal:10, scaling:6, desc:'+<val> <span style="color:#ff007f;">daño</span>.', x:50, y:300, children:['pe2A','pe2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'pe2A', name:'Inyección SQL', max:5, cost:1, req:{node:'pe1', count:3}, baseVal:20, scaling:10, desc:'+<val> <span style="color:#ff007f;">daño</span>.', x:250, y:180, children:['pe3A'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'pe2B', name:'Zero Day', max:5, cost:1, req:{node:'pe1', count:3}, baseVal:4, scaling:2, desc:'+<val>% <span style="color:#ff007f;">Crítico</span>.', x:250, y:420, children:['pe3B'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'pe3A', name:'Buffer Overflow', max:5, cost:1, req:{node:'pe2A', count:3}, baseVal:35, scaling:15, desc:'+<val> <span style="color:#ff007f;">daño</span>.', x:450, y:180, children:['pe4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'pe3B', name:'Root Access', max:5, cost:1, req:{node:'pe2B', count:3}, baseVal:40, scaling:18, desc:'+<val> <span style="color:#ff007f;">daño</span>.', x:450, y:420, children:['pe4'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'pe4', name:'Kernel Panic', max:5, cost:1, req:{node:'pe3A', count:3}, baseVal:15, scaling:5, desc:'Activa: <span style="color:#00f0ff;"><val> DOT</span>.', x:700, y:300, children:['pe5'], type:'active', cd:10, dotTicks:5, dotInterval:2, baseDmg:15, scalingDmg:5, stat:'damage', colorType:'cyan', effect:'dot_buff', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'pe5', name:'Omega Prompt', max:5, cost:1, req:{node:'pe4', count:3}, baseVal:200, scaling:80, desc:'+<val> <span style="color:#ff007f;">daño absoluto</span>.', x:950, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Monetización',
                         nodes: [
-                            {id:'pe8', name:'Sponsors IA', max:5, cost:1, req: {points:0}, desc:'+15% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 50, y: 200, children: ['pe9', 'pe10'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'pe9', name:'Viralidad Ads', max:5, cost:1, req: {node:'pe8', count:3}, desc:'+30% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 250, y: 100, children: ['pe11'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'pe10', name:'Cashflow Inter', max:5, cost:1, req: {node:'pe8', count:3}, desc:'Activa: Inyección de <span style="color:#f3e600;">Hype</span> basada en <span style="color:#00f0ff;">10x nivel</span>.', x: 250, y: 300, children: ['pe11'], type:'active', cd: 20, mult: 10, stat: 'level', colorType: 'yellow', effect:'active_hype_boost', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe11', name:'Marketing', max:5, cost:1, req: {node:'pe9', count:3}, desc:'+50% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 450, y: 200, children: ['pe12'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe12', name:'Cripto Minería', max:5, cost:1, req: {node:'pe11', count:3}, desc:'+80% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 650, y: 200, children: ['pe25', 'pe26'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'pe25', name:'Tokenomics', max:5, cost:1, req: {node:'pe12', count:3}, desc:'+110% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 850, y: 100, children: ['pe27'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'pe26', name:'Venture Cap', max:5, cost:1, req: {node:'pe12', count:3}, desc:'Activa: Bono de <span style="color:#f3e600;">Hype</span> x<span style="color:#00f0ff;">25</span>.', x: 850, y: 300, children: ['pe28'], type:'active', cd: 25, mult: 25, stat: 'level', colorType: 'yellow', effect:'venture_boost', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe27', name:'Global Fund', max:5, cost:1, req: {node:'pe25', count:3}, desc:'+150% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 1050, y: 100, children: ['pe29'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'pe28', name:'Syndicate', max:5, cost:1, req: {node:'pe26', count:3}, desc:'+25% EXP de red.', x: 1050, y: 300, children: ['pe29'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'pe29', name:'Monopoly', max:5, cost:1, req: {node:'pe27', count:3}, desc:'+220% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 1250, y: 200, children: ['pe13'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'pe13', name:'Imperio Ads', max:5, cost:1, req: {node:'pe29', count:3}, desc:'Activa: Cosecha masiva de <span style="color:#f3e600;">Hype</span>.', x: 1450, y: 200, children: [], type:'active', cd: 30, mult: 50, stat: 'level', colorType: 'yellow', effect:'double_hype', shape:'star', color:'border-cyber-neonCyan'}
+                            {id:'pm1', name:'Sponsors IA', max:5, cost:1, req:{points:0}, baseVal:12, scaling:8, desc:'+<val>% <span style="color:#f3e600;">Hype</span>.', x:50, y:300, children:['pm2A','pm2B','pm2C'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'pm2A', name:'Viralidad Ads', max:5, cost:1, req:{node:'pm1', count:3}, baseVal:25, scaling:12, desc:'+<val>% Hype.', x:250, y:120, children:['pm3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'pm2B', name:'Cripto Minería', max:5, cost:1, req:{node:'pm1', count:3}, baseVal:20, scaling:10, desc:'+<val>% Hype.', x:250, y:300, children:['pm3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'pm2C', name:'Suscripción VIP', max:5, cost:1, req:{node:'pm1', count:3}, baseVal:30, scaling:14, desc:'+<val>% Hype.', x:250, y:480, children:['pm3'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'pm3', name:'Tokenomics', max:5, cost:1, req:{node:'pm2B', count:3}, baseVal:60, scaling:25, desc:'+<val>% Hype.', x:600, y:300, children:['pm4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'pm4', name:'Imperio Ads', max:5, cost:1, req:{node:'pm3', count:3}, baseVal:250, scaling:80, desc:'+<val>% <span style="color:#f3e600;">Hype supremo</span>.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Criti-Core',
                         nodes: [
-                            {id:'pe14', name:'CPU Boost', max:5, cost:1, req: {points:0}, desc:'+10 <span style="color:#ff007f;">daño</span>.', x: 50, y: 200, children: ['pe15', 'pe16'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'pe15', name:'Overclock GPU', max:5, cost:1, req: {node:'pe14', count:3}, desc:'+20% <span style="color:#ff007f;">Daño Crit</span>.', x: 250, y: 100, children: ['pe17'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'pe16', name:'Pulso Crítico', max:5, cost:1, req: {node:'pe14', count:3}, desc:'Activa: Golpe crítico directo de <span style="color:#00f0ff;">2.0x</span> del <span style="color:#ff007f;">daño crítico</span>.', x: 250, y: 300, children: ['pe17'], type:'active', cd: 12, mult: 2.0, stat: 'crit', colorType: 'cyan', effect:'active_crit_hit', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe17', name:'Quantum Core', max:5, cost:1, req: {node:'pe15', count:3}, desc:'+50 <span style="color:#ff007f;">daño</span>.', x: 450, y: 200, children: ['pe18'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe18', name:'Hiper Hilos', max:5, cost:1, req: {node:'pe17', count:3}, desc:'+90 <span style="color:#ff007f;">daño</span>.', x: 650, y: 200, children: ['pe30', 'pe31'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'pe30', name:'Quantum Thread', max:5, cost:1, req: {node:'pe18', count:3}, desc:'+130 <span style="color:#ff007f;">daño</span>.', x: 850, y: 100, children: ['pe32'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'pe31', name:'Flux Capacitor', max:5, cost:1, req: {node:'pe18', count:3}, desc:'Activa: Ráfaga Flux de <span style="color:#00f0ff;">3x</span> del <span style="color:#ff007f;">daño de click</span>.', x: 850, y: 300, children: ['pe33'], type:'active', cd: 10, mult: 3.0, stat: 'damage', colorType: 'cyan', effect:'flux_burst', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pe32', name:'Hyper Processor', max:5, cost:1, req: {node:'pe30', count:3}, desc:'+190 <span style="color:#ff007f;">daño</span>.', x: 1050, y: 100, children: ['pe34'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'pe33', name:'Plasma Core', max:5, cost:1, req: {node:'pe31', count:3}, desc:'+10% <span style="color:#ff007f;">Crit Chance</span>.', x: 1050, y: 300, children: ['pe34'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'pe34', name:'Absolute Zero', max:5, cost:1, req: {node:'pe32', count:3}, desc:'+280 <span style="color:#ff007f;">daño</span>.', x: 1250, y: 200, children: ['pe19'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'pe19', name:'Singularidad', max:5, cost:1, req: {node:'pe34', count:3}, desc:'Activa: Ráfaga letal de <span style="color:#00f0ff;">5x</span> del <span style="color:#ff007f;">daño crítico</span>.', x: 1450, y: 200, children: [], type:'active', cd: 20, mult: 5.0, stat: 'crit', colorType: 'pink', effect:'burst_clicks', shape:'star', color:'border-cyber-neonCyan'}
+                            {id:'cc1', name:'CPU Boost', max:5, cost:1, req:{points:0}, baseVal:8, scaling:6, desc:'+<val> <span style="color:#ff007f;">daño</span>.', x:50, y:300, children:['cc2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'cc2', name:'Overclock GPU', max:5, cost:1, req:{node:'cc1', count:3}, baseVal:15, scaling:8, desc:'+<val>% Daño Crit.', x:250, y:300, children:['cc3A','cc3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'cc3A', name:'Quantum Core', max:5, cost:1, req:{node:'cc2', count:3}, baseVal:40, scaling:15, desc:'+<val> daño.', x:500, y:180, children:['cc4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'cc3B', name:'Hiper Hilos', max:5, cost:1, req:{node:'cc2', count:3}, baseVal:45, scaling:18, desc:'+<val> daño.', x:500, y:420, children:['cc4'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'cc4', name:'Apex Core', max:5, cost:1, req:{node:'cc3A', count:3}, baseVal:300, scaling:100, desc:'+<val> <span style="color:#ff007f;">daño definitivo</span>.', x:800, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     }
                 ]
@@ -579,47 +639,34 @@
                     {
                         name: 'Enjambre Pasivo',
                         nodes: [
-                            {id:'as1', name:'Bot Post', max:5, cost:1, req: {points:0}, desc:'+8 <span style="color:#ff007f;">DOT</span>.', x: 50, y: 200, children: ['as2', 'as4'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'as2', name:'Deepfake', max:5, cost:1, req: {node:'as1', count:3}, desc:'+20 <span style="color:#ff007f;">DOT</span>.', x: 250, y: 100, children: ['as3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'as4', name:'Skynet Local', max:5, cost:1, req: {node:'as1', count:3}, desc:'+50 <span style="color:#ff007f;">daño DOT</span>.', x: 250, y: 300, children: ['as3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'as3', name:'Infección Inter', max:5, cost:1, req: {node:'as4', count:3}, desc:'Activa: Inyecta <span style="color:#00f0ff;">2.0x</span> del <span style="color:#ff007f;">daño DOT</span> actual.', x: 450, y: 300, children: ['as5'], type:'active', cd: 10, mult: 2.0, stat: 'dot', colorType: 'violet', effect:'active_dot', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'as5', name:'Colmena Abis', max:5, cost:1, req: {node:'as3', count:3}, desc:'+100 <span style="color:#ff007f;">DOT</span>.', x: 650, y: 200, children: ['as17', 'as18'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'as17', name:'Swarm Mind', max:5, cost:1, req: {node:'as5', count:3}, desc:'+150 <span style="color:#ff007f;">DOT</span>.', x: 850, y: 100, children: ['as19'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'as18', name:'Borg Net', max:5, cost:1, req: {node:'as5', count:3}, desc:'Activa: Pulso Borg de <span style="color:#00f0ff;">3.5x</span> del <span style="color:#ff007f;">daño DOT</span>.', x: 850, y: 300, children: ['as20'], type:'active', cd: 12, mult: 3.5, stat: 'dot', colorType: 'violet', effect:'borg_pulse', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'as19', name:'Hive Queen', max:5, cost:1, req: {node:'as17', count:3}, desc:'+220 <span style="color:#ff007f;">DOT</span>.', x: 1050, y: 100, children: ['as21'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'as20', name:'Neuro Worm', max:5, cost:1, req: {node:'as18', count:3}, desc:'+25 <span style="color:#ff007f;">Daño base</span>.', x: 1050, y: 300, children: ['as21'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'as21', name:'Omega Virus', max:5, cost:1, req: {node:'as19', count:3}, desc:'+350 <span style="color:#ff007f;">DOT</span>.', x: 1250, y: 200, children: ['as6'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'as6', name:'Virus En Red', max:5, cost:1, req: {node:'as21', count:3}, desc:'Activa: Tormenta viral de <span style="color:#00f0ff;">6x</span> del <span style="color:#ff007f;">daño DOT</span>.', x: 1450, y: 200, children: [], type:'active', cd: 15, mult: 6.0, stat: 'dot', colorType: 'violet', effect:'virus_storm', shape:'star', color:'border-cyber-neonCyan'}
+                            {id:'as1', name:'Bot Post', max:5, cost:1, req:{points:0}, baseVal:8, scaling:5, desc:'+<val> DOT.', x:50, y:300, children:['as2A','as2B','as2C'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'as2A', name:'Deepfake', max:5, cost:1, req:{node:'as1', count:3}, baseVal:18, scaling:9, desc:'+<val> DOT.', x:300, y:120, children:['as3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'as2B', name:'Skynet Local', max:5, cost:1, req:{node:'as1', count:3}, baseVal:20, scaling:10, desc:'+<val> DOT.', x:300, y:300, children:['as3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'as2C', name:'Botnet Z', max:5, cost:1, req:{node:'as1', count:3}, baseVal:22, scaling:11, desc:'+<val> DOT.', x:300, y:480, children:['as3'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'as3', name:'Hive Queen', max:5, cost:1, req:{node:'as2B', count:3}, baseVal:140, scaling:50, desc:'+<val> DOT.', x:650, y:300, children:['as4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'as4', name:'Omega Virus', max:5, cost:1, req:{node:'as3', count:3}, baseVal:250, scaling:90, desc:'+<val> DOT definitivo.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Control Red',
                         nodes: [
-                            {id:'as7', name:'Cache Limpio', max:5, cost:1, req: {points:0}, desc:'+10% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 50, y: 200, children: ['as8'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'as8', name:'Proxy Inverso', max:5, cost:1, req: {node:'as7', count:3}, desc:'+25% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 250, y: 200, children: ['as9'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'as9', name:'Firewall Nube', max:5, cost:1, req: {node:'as8', count:3}, desc:'+45% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 450, y: 200, children: ['as10'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'as10', name:'Matriz Segura', max:5, cost:1, req: {node:'as9', count:3}, desc:'+70% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 650, y: 200, children: ['as22', 'as23'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'as22', name:'Zero Trust', max:5, cost:1, req: {node:'as10', count:3}, desc:'+100% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 850, y: 100, children: ['as24'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'as23', name:'Proxy Shield', max:5, cost:1, req: {node:'as10', count:3}, desc:'Activa: Escudo con bono de <span style="color:#f3e600;">Hype</span>.', x: 850, y: 300, children: ['as25'], type:'active', cd: 20, mult: 15, stat: 'level', colorType: 'yellow', effect:'shield_sync', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'as24', name:'Quantum Guard', max:5, cost:1, req: {node:'as22', count:3}, desc:'+140% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 1050, y: 100, children: ['as26'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'as25', name:'Node Protect', max:5, cost:1, req: {node:'as23', count:3}, desc:'+15% EXP de red.', x: 1050, y: 300, children: ['as26'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'as26', name:'Cyber Citadel', max:5, cost:1, req: {node:'as24', count:3}, desc:'+200% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 1250, y: 200, children: ['as11'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'as11', name:'Bloqueo', max:5, cost:1, req: {node:'as26', count:3}, desc:'Activa: Congelamiento temporal y <span style="color:#00f0ff;">daño DOT</span>.', x: 1450, y: 200, children: [], type:'active', cd: 30, mult: 4.0, stat: 'dot', colorType: 'violet', effect:'freeze_timer', shape:'star', color:'border-cyber-neonCyan'}
+                            {id:'ac1', name:'Cache Limpio', max:5, cost:1, req:{points:0}, baseVal:10, scaling:5, desc:'+<val>% Hype.', x:50, y:300, children:['ac2A','ac2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'ac2A', name:'Proxy Inverso', max:5, cost:1, req:{node:'ac1', count:3}, baseVal:22, scaling:10, desc:'+<val>% Hype.', x:300, y:180, children:['ac3A','ac3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'ac2B', name:'Firewall Nube', max:5, cost:1, req:{node:'ac1', count:3}, baseVal:40, scaling:15, desc:'+<val>% Hype.', x:300, y:420, children:['ac3B'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'ac3A', name:'Zero Trust A', max:5, cost:1, req:{node:'ac2A', count:3}, baseVal:70, scaling:25, desc:'+<val>% Hype.', x:600, y:180, children:['ac4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'ac3B', name:'Zero Trust B', max:5, cost:1, req:{node:'ac2B', count:3}, baseVal:80, scaling:28, desc:'+<val>% Hype.', x:600, y:420, children:['ac4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'ac4', name:'AI Overlord', max:5, cost:1, req:{node:'ac3A', count:3}, baseVal:200, scaling:70, desc:'+<val>% Hype total.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Automatización',
                         nodes: [
-                            {id:'as12', name:'Script Auto', max:5, cost:1, req: {points:0}, desc:'+5 <span style="color:#ff007f;">daño</span>.', x: 50, y: 200, children: ['as13'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'as13', name:'Daemon Activo', max:5, cost:1, req: {node:'as12', count:3}, desc:'+15 <span style="color:#ff007f;">daño</span>.', x: 250, y: 200, children: ['as14'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'as14', name:'Cron-Job', max:5, cost:1, req: {node:'as13', count:3}, desc:'+35 <span style="color:#ff007f;">daño</span>.', x: 450, y: 200, children: ['as15'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'as15', name:'Loop Infinito', max:5, cost:1, req: {node:'as14', count:3}, desc:'+70 <span style="color:#ff007f;">daño</span>.', x: 650, y: 200, children: ['as27', 'as28'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'as27', name:'Async Worker', max:5, cost:1, req: {node:'as15', count:3}, desc:'+110 <span style="color:#ff007f;">daño</span>.', x: 850, y: 100, children: ['as29'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'as28', name:'Thread Pool', max:5, cost:1, req: {node:'as15', count:3}, desc:'Activa: Oleada de hilos de <span style="color:#00f0ff;">2.5x</span> del <span style="color:#ff007f;">daño de click</span>.', x: 850, y: 300, children: ['as30'], type:'active', cd: 15, mult: 2.5, stat: 'damage', colorType: 'cyan', effect:'pool_surge', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'as29', name:'Cluster Master', max:5, cost:1, req: {node:'as27', count:3}, desc:'+180 <span style="color:#ff007f;">daño</span>.', x: 1050, y: 100, children: ['as31'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'as30', name:'Auto Deploy', max:5, cost:1, req: {node:'as28', count:3}, desc:'+10% Crit Rate.', x: 1050, y: 300, children: ['as31'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'as31', name:'Autonomous AI', max:5, cost:1, req: {node:'as29', count:3}, desc:'+260 <span style="color:#ff007f;">daño</span>.', x: 1250, y: 200, children: ['as16'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'as16', name:'Enjambre Omega', max:5, cost:1, req: {node:'as31', count:3}, desc:'Activa: Oleada omega de <span style="color:#00f0ff;">5.0x</span> del <span style="color:#ff007f;">daño DOT</span>.', x: 1450, y: 200, children: [], type:'active', cd: 25, mult: 5.0, stat: 'dot', colorType: 'violet', effect:'botnet_surge', shape:'star', color:'border-cyber-neonCyan'}
+                            {id:'aa1', name:'Script Auto', max:5, cost:1, req:{points:0}, baseVal:6, scaling:4, desc:'+<val> daño.', x:50, y:300, children:['aa2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'aa2', name:'Daemon Activo', max:5, cost:1, req:{node:'aa1', count:3}, baseVal:15, scaling:8, desc:'+<val> daño.', x:250, y:300, children:['aa3A','aa3B','aa3C'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'aa3A', name:'Cron A', max:5, cost:1, req:{node:'aa2', count:3}, baseVal:35, scaling:15, desc:'+<val> daño.', x:500, y:150, children:['aa4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'aa3B', name:'Cron B', max:5, cost:1, req:{node:'aa2', count:3}, baseVal:40, scaling:16, desc:'+<val> daño.', x:500, y:300, children:['aa4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'aa3C', name:'Cron C', max:5, cost:1, req:{node:'aa2', count:3}, baseVal:45, scaling:18, desc:'+<val> daño.', x:500, y:450, children:['aa4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'aa4', name:'Autonomous AI', max:5, cost:1, req:{node:'aa3B', count:3}, baseVal:140, scaling:50, desc:'+<val> daño.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     }
                 ]
@@ -632,49 +679,172 @@
                     {
                         name: 'Sinergia Híbrida',
                         nodes: [
-                            {id:'qa1', name:'Qubit Base', max:5, cost:1, req: {points:0}, desc:'+6 <span style="color:#ff007f;">daño</span>.', x: 50, y: 200, children: ['qa2', 'qa4'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'qa2', name:'Reactor Q', max:5, cost:1, req: {node:'qa1', count:3}, desc:'+15 <span style="color:#ff007f;">daño</span>.', x: 250, y: 100, children: ['qa3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'qa4', name:'Supremacía', max:5, cost:1, req: {node:'qa1', count:3}, desc:'Activa: Supremacía con bono de <span style="color:#f3e600;">Hype</span>.', x: 250, y: 300, children: ['qa3'], type:'active', cd: 35, mult: 20, stat: 'level', colorType: 'yellow', effect:'cd_reduction', shape:'star', color:'border-cyber-neonCyan'},
-                            {id:'qa3', name:'Pulso Cuántico', max:5, cost:1, req: {node:'qa4', count:3}, desc:'Activa: Pulso cuántico de <span style="color:#00f0ff;">1.8x</span> del <span style="color:#ff007f;">daño de click</span>.', x: 450, y: 300, children: ['qa14', 'qa15'], type:'active', cd: 12, mult: 1.8, stat: 'damage', colorType: 'cyan', effect:'active_quantum', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'qa14', name:'Hyper Qubit', max:5, cost:1, req: {node:'qa3', count:3}, desc:'+100 <span style="color:#ff007f;">daño</span>.', x: 650, y: 100, children: ['qa16'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'qa15', name:'Quantum Entangle', max:5, cost:1, req: {node:'qa3', count:3}, desc:'Activa: Entrelazamiento de <span style="color:#00f0ff;">3.0x</span> del <span style="color:#ff007f;">daño DOT</span>.', x: 650, y: 300, children: ['qa17'], type:'active', cd: 15, mult: 3.0, stat: 'dot', colorType: 'violet', effect:'entangle_pulse', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'qa16', name:'Multiverse Core', max:5, cost:1, req: {node:'qa14', count:3}, desc:'+160 <span style="color:#ff007f;">daño</span>.', x: 850, y: 100, children: ['qa18'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'qa17', name:'Superposition', max:5, cost:1, req: {node:'qa15', count:3}, desc:'+15% Crit Dmg.', x: 850, y: 300, children: ['qa18'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'qa18', name:'Singular Grid', max:5, cost:1, req: {node:'qa16', count:3}, desc:'+240 <span style="color:#ff007f;">daño</span>.', x: 1050, y: 200, children: ['qa5'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'qa5', name:'Multiverso', max:5, cost:1, req: {node:'qa18', count:3}, desc:'+60 <span style="color:#ff007f;">daño</span>.', x: 1250, y: 300, children: [], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'}
+                            {id:'qa1', name:'Qubit Base', max:5, cost:1, req:{points:0}, baseVal:6, scaling:4, desc:'+<val> daño.', x:50, y:300, children:['qa2A','qa2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'qa2A', name:'Reactor Q', max:5, cost:1, req:{node:'qa1', count:3}, baseVal:15, scaling:7, desc:'+<val> daño.', x:300, y:180, children:['qa3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'qa2B', name:'Pulso Q', max:5, cost:1, req:{node:'qa1', count:3}, baseVal:12, scaling:5, desc:'Activa.', x:300, y:420, children:['qa3A'], type:'active', cd:12, mult:1.8, stat:'damage', colorType:'cyan', effect:'active_quantum', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'qa3A', name:'Hyper Q', max:5, cost:1, req:{node:'qa2B', count:3}, baseVal:45, scaling:18, desc:'+<val> daño.', x:550, y:180, children:['qa4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'qa3B', name:'Super Q', max:5, cost:1, req:{node:'qa2A', count:3}, baseVal:50, scaling:20, desc:'+<val> daño.', x:550, y:420, children:['qa4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'qa4', name:'Multiverso', max:5, cost:1, req:{node:'qa3A', count:3}, baseVal:180, scaling:60, desc:'+<val> daño.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Eficiencia Matriz',
                         nodes: [
-                            {id:'qa6', name:'Compresión', max:5, cost:1, req: {points:0}, desc:'-5% Costo.', x: 50, y: 200, children: ['qa7'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'qa7', name:'Algoritmo Opt', max:5, cost:1, req: {node:'qa6', count:3}, desc:'-12% Costo y recuperación nave.', x: 250, y: 200, children: ['qa8'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'qa8', name:'Cripto Red', max:5, cost:1, req: {node:'qa7', count:3}, desc:'-20% Costo.', x: 450, y: 200, children: ['qa19', 'qa20'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'qa19', name:'Neural Compression', max:5, cost:1, req: {node:'qa8', count:3}, desc:'-25% Costo de mejoras.', x: 650, y: 100, children: ['qa21'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'qa20', name:'Fast Sync', max:5, cost:1, req: {node:'qa8', count:3}, desc:'Activa: Sync Burst con <span style="color:#f3e600;">Hype</span>.', x: 650, y: 300, children: ['qa22'], type:'active', cd: 20, mult: 12, stat: 'level', colorType: 'yellow', effect:'sync_burst', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'qa21', name:'Quantum Cache', max:5, cost:1, req: {node:'qa19', count:3}, desc:'+50% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 850, y: 100, children: ['qa23'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'qa22', name:'Zero Latency', max:5, cost:1, req: {node:'qa20', count:3}, desc:'-15% CD de habilidades.', x: 850, y: 300, children: ['qa23'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'qa23', name:'Matrix Flow', max:5, cost:1, req: {node:'qa21', count:3}, desc:'+90% <span style="color:#f3e600; font-weight:bold;">Hype</span>.', x: 1050, y: 200, children: ['qa9'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'qa9', name:'Matriz Eterna', max:5, cost:1, req: {node:'qa23', count:3}, desc:'Activa: Bucle matricial de <span style="color:#00f0ff;">4x</span> del <span style="color:#ff007f;">daño de click</span>.', x: 1250, y: 200, children: [], type:'active', cd: 40, mult: 4.0, stat: 'damage', colorType: 'cyan', effect:'matrix_loop', shape:'star', color:'border-cyber-neonCyan'}
+                            {id:'qe1', name:'Compresión', max:5, cost:1, req:{points:0}, baseVal:5, scaling:2, desc:'-<val>% Costo.', x:50, y:300, children:['qe2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'qe2', name:'Algoritmo Opt', max:5, cost:1, req:{node:'qe1', count:3}, baseVal:12, scaling:4, desc:'-<val>% Costo.', x:250, y:300, children:['qe3A','qe3B','qe3C'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'qe3A', name:'Cripto A', max:5, cost:1, req:{node:'qe2', count:3}, baseVal:25, scaling:8, desc:'+<val>% Hype.', x:500, y:120, children:['qe4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'qe3B', name:'Cripto B', max:5, cost:1, req:{node:'qe2', count:3}, baseVal:30, scaling:10, desc:'+<val>% Hype.', x:500, y:300, children:['qe4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'qe3C', name:'Cripto C', max:5, cost:1, req:{node:'qe2', count:3}, baseVal:35, scaling:12, desc:'+<val>% Hype.', x:500, y:480, children:['qe4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'qe4', name:'Matriz Eterna', max:5, cost:1, req:{node:'qe3B', count:3}, baseVal:120, scaling:40, desc:'+<val>% Hype.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Pulso Neutrónico',
                         nodes: [
-                            {id:'qa10', name:'Pulso E', max:5, cost:1, req: {points:0}, desc:'+8 <span style="color:#ff007f;">daño</span>.', x: 50, y: 200, children: ['qa11'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'qa11', name:'Tormenta Q', max:5, cost:1, req: {node:'qa10', count:3}, desc:'+20 <span style="color:#ff007f;">daño</span>.', x: 250, y: 200, children: ['qa12'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'qa12', name:'Plasma C', max:5, cost:1, req: {node:'qa11', count:3}, desc:'+45 <span style="color:#ff007f;">daño</span>.', x: 450, y: 200, children: ['qa24', 'qa25'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'qa24', name:'Neutron Flux', max:5, cost:1, req: {node:'qa12', count:3}, desc:'+90 <span style="color:#ff007f;">daño</span>.', x: 650, y: 100, children: ['qa26'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'qa25', name:'Ion Charge', max:5, cost:1, req: {node:'qa12', count:3}, desc:'Activa: Carga iónica de <span style="color:#00f0ff;">2.2x</span> del <span style="color:#ff007f;">daño de click</span>.', x: 650, y: 300, children: ['qa27'], type:'active', cd: 10, mult: 2.2, stat: 'damage', colorType: 'cyan', effect:'ion_blast', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'qa26', name:'Plasma Storm', max:5, cost:1, req: {node:'qa24', count:3}, desc:'+150 <span style="color:#ff007f;">daño</span>.', x: 850, y: 100, children: ['qa28'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'qa27', name:'Reactor Overload', max:5, cost:1, req: {node:'qa25', count:3}, desc:'+12% Crit Rate.', x: 850, y: 300, children: ['qa28'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'qa28', name:'Supernova Core', max:5, cost:1, req: {node:'qa26', count:3}, desc:'+230 <span style="color:#ff007f;">daño</span>.', x: 1050, y: 200, children: ['qa13'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'qa13', name:'Apagón Global', max:5, cost:1, req: {node:'qa28', count:3}, desc:'Activa: Apagón de <span style="color:#00f0ff;">5.5x</span> del <span style="color:#ff007f;">daño crítico</span>.', x: 1250, y: 200, children: [], type:'active', cd: 20, mult: 5.5, stat: 'crit', colorType: 'pink', effect:'global_blackout', shape:'star', color:'border-cyber-neonCyan'}
+                            {id:'qp1', name:'Pulso E', max:5, cost:1, req:{points:0}, baseVal:8, scaling:5, desc:'+<val> daño.', x:50, y:300, children:['qp2A','qp2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'qp2A', name:'Tormenta Q', max:5, cost:1, req:{node:'qp1', count:3}, baseVal:20, scaling:8, desc:'+<val> daño.', x:300, y:200, children:['qp3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'qp2B', name:'Plasma C', max:5, cost:1, req:{node:'qp1', count:3}, baseVal:25, scaling:10, desc:'+<val> daño.', x:300, y:400, children:['qp3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'qp3', name:'Plasma Storm', max:5, cost:1, req:{node:'qp2A', count:3}, baseVal:70, scaling:25, desc:'+<val> daño.', x:600, y:300, children:['qp4A','qp4B'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'qp4A', name:'Supernova A', max:5, cost:1, req:{node:'qp3', count:3}, baseVal:150, scaling:50, desc:'+<val> daño.', x:850, y:180, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'},
+                            {id:'qp4B', name:'Supernova B', max:5, cost:1, req:{node:'qp3', count:3}, baseVal:160, scaling:55, desc:'+<val> daño.', x:850, y:420, children:[], type:'passive', shape:'star', color:'border-cyber-neonPink'}
+                        ]
+                    }
+                ]
+            },
+            CyberSamurai: {
+                icon: '🗡️',
+                name: 'Cyber Samurai',
+                desc: classDescriptions.CyberSamurai,
+                branches: [
+                    {
+                        name: 'Filo Láser',
+                        nodes: [
+                            {id:'cs1', name:'Katana Core', max:5, cost:1, req:{points:0}, baseVal:12, scaling:8, desc:'+<val> daño.', x:50, y:300, children:['cs2A','cs2B','cs2C'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'cs2A', name:'Monofil A', max:5, cost:1, req:{node:'cs1', count:3}, baseVal:28, scaling:12, desc:'+<val> daño.', x:300, y:120, children:['cs3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'cs2B', name:'Monofil B', max:5, cost:1, req:{node:'cs1', count:3}, baseVal:30, scaling:13, desc:'+<val> daño.', x:300, y:300, children:['cs3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'cs2C', name:'Monofil C', max:5, cost:1, req:{node:'cs1', count:3}, baseVal:32, scaling:14, desc:'+<val> daño.', x:300, y:480, children:['cs3'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'cs3', name:'Katana Asesina', max:5, cost:1, req:{node:'cs2B', count:3}, baseVal:110, scaling:40, desc:'+<val> daño.', x:600, y:300, children:['cs4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'cs4', name:'Filo Infinito', max:5, cost:1, req:{node:'cs3', count:3}, baseVal:250, scaling:85, desc:'+<val> daño.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                        ]
+                    },
+                    {
+                        name: 'Reflejos',
+                        nodes: [
+                            {id:'cr1', name:'Parry Rápido', max:5, cost:1, req:{points:0}, baseVal:4, scaling:2, desc:'+<val>% Crit.', x:50, y:300, children:['cr2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'cr2', name:'Esquina Ciega', max:5, cost:1, req:{node:'cr1', count:3}, baseVal:15, scaling:6, desc:'+<val>% Daño Crit.', x:250, y:300, children:['cr3A','cr3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'cr3A', name:'Zen A', max:5, cost:1, req:{node:'cr2', count:3}, baseVal:40, scaling:15, desc:'+<val>% Daño Crit.', x:550, y:180, children:['cr4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'cr3B', name:'Zen B', max:5, cost:1, req:{node:'cr2', count:3}, baseVal:45, scaling:18, desc:'+<val> Crit.', x:550, y:420, children:['cr4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'cr4', name:'Maestría Katana', max:5, cost:1, req:{node:'cr3A', count:3}, baseVal:150, scaling:50, desc:'+<val>% Crit final.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                        ]
+                    },
+                    {
+                        name: 'Honor',
+                        nodes: [
+                            {id:'ch1', name:'Bushido Digital', max:5, cost:1, req:{points:0}, baseVal:15, scaling:8, desc:'+<val>% Hype.', x:50, y:300, children:['ch2A','ch2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'ch2A', name:'Honor A', max:5, cost:1, req:{node:'ch1', count:3}, baseVal:35, scaling:15, desc:'+<val>% Hype.', x:300, y:180, children:['ch3A','ch3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'ch2B', name:'Honor B', max:5, cost:1, req:{node:'ch1', count:3}, baseVal:40, scaling:16, desc:'+<val>% Hype.', x:300, y:420, children:['ch3B'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'ch3A', name:'Shogun A', max:5, cost:1, req:{node:'ch2A', count:3}, baseVal:90, scaling:30, desc:'+<val>% Hype.', x:600, y:180, children:['ch4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'ch3B', name:'Shogun B', max:5, cost:1, req:{node:'ch2B', count:3}, baseVal:100, scaling:35, desc:'+<val>% Hype.', x:600, y:420, children:['ch4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'ch4', name:'Emperador Ciber', max:5, cost:1, req:{node:'ch3A', count:3}, baseVal:240, scaling:80, desc:'+<val>% Hype supremo.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                        ]
+                    }
+                ]
+            },
+            NeuralHacker: {
+                icon: '💻',
+                name: 'Neural Hacker',
+                desc: classDescriptions.NeuralHacker,
+                branches: [
+                    {
+                        name: 'Infiltración',
+                        nodes: [
+                            {id:'nh1', name:'Root Exploit', max:5, cost:1, req:{points:0}, baseVal:10, scaling:6, desc:'+<val> DOT.', x:50, y:300, children:['nh2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'nh2', name:'Zero-Day', max:5, cost:1, req:{node:'nh1', count:3}, baseVal:22, scaling:10, desc:'+<val> DOT.', x:250, y:300, children:['nh3A','nh3B','nh3C'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'nh3A', name:'Payload A', max:5, cost:1, req:{node:'nh2', count:3}, baseVal:50, scaling:18, desc:'+<val> DOT.', x:550, y:120, children:['nh4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'nh3B', name:'Payload B', max:5, cost:1, req:{node:'nh2', count:3}, baseVal:55, scaling:20, desc:'+<val> DOT.', x:550, y:300, children:['nh4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'nh3C', name:'Payload C', max:5, cost:1, req:{node:'nh2', count:3}, baseVal:60, scaling:22, desc:'+<val> DOT.', x:550, y:480, children:['nh4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'nh4', name:'Omega Hack', max:5, cost:1, req:{node:'nh3B', count:3}, baseVal:220, scaling:75, desc:'+<val> DOT letal.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                        ]
+                    },
+                    {
+                        name: 'Malware',
+                        nodes: [
+                            {id:'nm1', name:'Trojan v1', max:5, cost:1, req:{points:0}, baseVal:12, scaling:6, desc:'+<val>% Hype.', x:50, y:300, children:['nm2A','nm2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'nm2A', name:'Worm A', max:5, cost:1, req:{node:'nm1', count:3}, baseVal:28, scaling:12, desc:'+<val>% Hype.', x:300, y:180, children:['nm3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'nm2B', name:'Worm B', max:5, cost:1, req:{node:'nm1', count:3}, baseVal:32, scaling:14, desc:'+<val>% Hype.', x:300, y:420, children:['nm3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'nm3', name:'Botnet Global', max:5, cost:1, req:{node:'nm2A', count:3}, baseVal:70, scaling:25, desc:'+<val>% Hype.', x:600, y:300, children:['nm4A','nm4B'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'nm4A', name:'Matrix A', max:5, cost:1, req:{node:'nm3', count:3}, baseVal:180, scaling:60, desc:'+<val>% Hype.', x:850, y:180, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'},
+                            {id:'nm4B', name:'Matrix B', max:5, cost:1, req:{node:'nm3', count:3}, baseVal:190, scaling:65, desc:'+<val>% Hype.', x:850, y:420, children:[], type:'passive', shape:'star', color:'border-cyber-neonPink'}
+                        ]
+                    },
+                    {
+                        name: 'Firewall Bypass',
+                        nodes: [
+                            {id:'fb1', name:'Zero Trace', max:5, cost:1, req:{points:0}, baseVal:2, scaling:1, desc:'-<val>% CD.', x:50, y:300, children:['fb2A','fb2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
+                            {id:'fb2A', name:'Ghost Protocol', max:5, cost:1, req:{node:'fb1', count:3}, baseVal:5, scaling:2, desc:'-<val>% CD.', x:300, y:200, children:['fb3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'fb2B', name:'Shadow Ping', max:5, cost:1, req:{node:'fb1', count:3}, baseVal:6, scaling:2, desc:'-<val>% CD.', x:300, y:400, children:['fb3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'fb3', name:'Phantom Node', max:5, cost:1, req:{node:'fb2A', count:3}, baseVal:12, scaling:4, desc:'-<val>% CD.', x:600, y:300, children:['fb4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'fb4', name:'Invisible Web', max:5, cost:1, req:{node:'fb3', count:3}, baseVal:25, scaling:5, desc:'-<val>% CD máx.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                        ]
+                    }
+                ]
+            },
+            VoidWeaver: {
+                icon: '🌌',
+                name: 'Void Weaver',
+                desc: classDescriptions.VoidWeaver,
+                branches: [
+                    {
+                        name: 'Energía Oscura',
+                        nodes: [
+                            {id:'vw1', name:'Void Spark', max:5, cost:1, req:{points:0}, baseVal:14, scaling:8, desc:'+<val> daño estelar.', x:50, y:300, children:['vw2A','vw2B','vw2C'], type:'passive', shape:'circle', color:'border-cyber-neonPurple'},
+                            {id:'vw2A', name:'Dark A', max:5, cost:1, req:{node:'vw1', count:3}, baseVal:30, scaling:14, desc:'+<val> daño.', x:300, y:120, children:['vw3'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'vw2B', name:'Dark B', max:5, cost:1, req:{node:'vw1', count:3}, baseVal:32, scaling:15, desc:'+<val> daño.', x:300, y:300, children:['vw3'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'vw2C', name:'Dark C', max:5, cost:1, req:{node:'vw1', count:3}, baseVal:35, scaling:16, desc:'+<val> daño.', x:300, y:480, children:['vw3'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'vw3', name:'Event Horizon', max:5, cost:1, req:{node:'vw2B', count:3}, baseVal:120, scaling:45, desc:'+<val> daño.', x:600, y:300, children:['vw4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'vw4', name:'Black Hole', max:5, cost:1, req:{node:'vw3', count:3}, baseVal:280, scaling:95, desc:'+<val> daño estelar.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                        ]
+                    },
+                    {
+                        name: 'Anomalía',
+                        nodes: [
+                            {id:'va1', name:'Gravity Well', max:5, cost:1, req:{points:0}, baseVal:15, scaling:7, desc:'+<val> DOT.', x:50, y:300, children:['va2'], type:'passive', shape:'circle', color:'border-cyber-neonPurple'},
+                            {id:'va2', name:'Spatial Rift', max:5, cost:1, req:{node:'va1', count:3}, baseVal:35, scaling:15, desc:'+<val> DOT.', x:250, y:300, children:['va3A','va3B'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'va3A', name:'Warp A', max:5, cost:1, req:{node:'va2', count:3}, baseVal:80, scaling:28, desc:'+<val> DOT.', x:550, y:180, children:['va4'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'va3B', name:'Warp B', max:5, cost:1, req:{node:'va2', count:3}, baseVal:90, scaling:32, desc:'+<val> DOT.', x:550, y:420, children:['va4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'va4', name:'Cosmic Collapse', max:5, cost:1, req:{node:'va3A', count:3}, baseVal:240, scaling:85, desc:'+<val> DOT cósmico.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                        ]
+                    },
+                    {
+                        name: 'Singularidad',
+                        nodes: [
+                            {id:'vs1', name:'Horizonte', max:5, cost:1, req:{points:0}, baseVal:20, scaling:10, desc:'+<val>% EXP.', x:50, y:300, children:['vs2A','vs2B'], type:'passive', shape:'circle', color:'border-cyber-neonPurple'},
+                            {id:'vs2A', name:'Loop A', max:5, cost:1, req:{node:'vs1', count:3}, baseVal:45, scaling:20, desc:'+<val>% EXP.', x:300, y:180, children:['vs3'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'vs2B', name:'Loop B', max:5, cost:1, req:{node:'vs1', count:3}, baseVal:50, scaling:22, desc:'+<val>% EXP.', x:300, y:420, children:['vs3'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'vs3', name:'Nebula Surge', max:5, cost:1, req:{node:'vs2A', count:3}, baseVal:120, scaling:45, desc:'+<val>% EXP.', x:600, y:300, children:['vs4A','vs4B'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'vs4A', name:'Ascend A', max:5, cost:1, req:{node:'vs3', count:3}, baseVal:250, scaling:80, desc:'+<val>% EXP.', x:850, y:180, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'},
+                            {id:'vs4B', name:'Ascend B', max:5, cost:1, req:{node:'vs3', count:3}, baseVal:260, scaling:85, desc:'+<val>% EXP.', x:850, y:420, children:[], type:'passive', shape:'star', color:'border-cyber-neonPink'}
                         ]
                     }
                 ]
             }
         };
+
+        function getClassSpecificStarterSkill(className) {
+            if (className === 'AISwarmMaster') {
+                return { id: 'class_skill_as', name: 'Protocolo Enjambre', cd: 8, dotTicks: 5, dotInterval: 2, baseDmg: 6, scalingDmg: 4, stat: 'dot', colorType: 'violet', effect: 'dot_buff', desc: '10s DOT de <span style="color:#00f0ff;">6 de daño cada 2s</span>.' };
+            } else if (className === 'QuantumArchitect') {
+                return { id: 'class_skill_qa', name: 'Pulso Estabilizador', cd: 7, dotTicks: 5, dotInterval: 2, baseDmg: 5, scalingDmg: 3, stat: 'damage', colorType: 'cyan', effect: 'dot_buff', desc: '10s DOT de <span style="color:#00f0ff;">5 de daño cada 2s</span>.' };
+            } else if (className === 'CyberSamurai') {
+                return { id: 'class_skill_cs', name: 'Corte de Plasma', cd: 5, dotTicks: 4, dotInterval: 2, baseDmg: 8, scalingDmg: 4, stat: 'damage', colorType: 'pink', effect: 'dot_buff', desc: '8s Sangrado de <span style="color:#00f0ff;">8 de daño cada 2s</span>.' };
+            } else if (className === 'NeuralHacker') {
+                return { id: 'class_skill_nh', name: 'Backdoor Neural', cd: 9, dotTicks: 5, dotInterval: 2, baseDmg: 7, scalingDmg: 5, stat: 'dot', colorType: 'yellow', effect: 'dot_buff', desc: '10s Hack de <span style="color:#00f0ff;">7 de daño cada 2s</span>.' };
+            } else if (className === 'VoidWeaver') {
+                return { id: 'class_skill_vw', name: 'Singularidad Oscura', cd: 10, dotTicks: 6, dotInterval: 2, baseDmg: 10, scalingDmg: 6, stat: 'dot', colorType: 'violet', effect: 'dot_buff', desc: '12s Vacío de <span style="color:#00f0ff;">10 de daño cada 2s</span>.' };
+            } else {
+                return { id: 'class_skill_pe', name: 'Inyección Rápida', cd: 6, dotTicks: 5, dotInterval: 2, baseDmg: 4, scalingDmg: 3, stat: 'damage', colorType: 'cyan', effect: 'dot_buff', desc: '10s DOT de <span style="color:#00f0ff;">4 de daño cada 2s</span>.' };
+            }
+        }
 
         const defaultUpgrades = [
             { id: 'dmg1', cat: 'hardware', sector: 1, name: 'Acelerador Neural (Sector 1)', cost: 15, mult: 1.45, level: 0, maxLevel: null, desc: '+2 <span style="color:#ff007f;">Daño directo</span> por prompt' },
@@ -716,6 +886,28 @@
             { id: 'ach9', name: 'Coleccionista de Shards', desc: 'Consigue 15 Shards.', target: 15, progress: 0, rewardCrystals: 20, claimed: false }
         ];
 
+        window.addEventListener('DOMContentLoaded', () => {
+            const rememberedUser = localStorage.getItem('wizz_remember_user');
+            const rememberedPass = localStorage.getItem('wizz_remember_pass');
+            if (rememberedUser && rememberedPass) {
+                document.getElementById('auth-username').value = rememberedUser;
+                document.getElementById('auth-password').value = rememberedPass;
+                document.getElementById('auth-remember').checked = true;
+                
+                // Auto login session on F5 / load
+                currentUser = rememberedUser;
+                currentPassword = rememberedPass;
+                rdb.ref('users/' + currentUser).once('value', snapshot => {
+                    const data = snapshot.val();
+                    if (data && data.password === currentPassword) {
+                        heroesList = data.heroes || [];
+                        document.getElementById('auth-screen').classList.add('hidden');
+                        openHeroSelector();
+                    }
+                });
+            }
+        });
+
         window.addEventListener('keydown', (e) => {
             if (!gameData || gameData.currentTower === 0 || bossFightActive || enemyHp <= 0) return;
             const key = e.key;
@@ -752,7 +944,7 @@
                 Object.keys(users).forEach(u => {
                     const uHeroes = users[u].heroes || [];
                     uHeroes.forEach(h => {
-                        if (h.name.trim().toLowerCase() === lowerTarget) exists = true;
+                        if (h.name && h.name.trim().toLowerCase() === lowerTarget) exists = true;
                     });
                 });
                 callback(!exists);
@@ -762,6 +954,8 @@
         function handleLogin() {
             const user = document.getElementById('auth-username').value.trim();
             const pass = document.getElementById('auth-password').value.trim();
+            const remember = document.getElementById('auth-remember').checked;
+
             if (!user || !pass) { showAuthError('⚠️ Ingresa usuario y contraseña.'); return; }
             rdb.ref('users/' + user).once('value', snapshot => {
                 const data = snapshot.val();
@@ -770,6 +964,15 @@
                 currentUser = user;
                 currentPassword = pass;
                 heroesList = data.heroes || [];
+
+                if (remember) {
+                    localStorage.setItem('wizz_remember_user', user);
+                    localStorage.setItem('wizz_remember_pass', pass);
+                } else {
+                    localStorage.removeItem('wizz_remember_user');
+                    localStorage.removeItem('wizz_remember_pass');
+                }
+
                 document.getElementById('auth-screen').classList.add('hidden');
                 openHeroSelector();
             });
@@ -778,6 +981,8 @@
         function handleRegister() {
             const user = document.getElementById('auth-username').value.trim();
             const pass = document.getElementById('auth-password').value.trim();
+            const remember = document.getElementById('auth-remember').checked;
+
             if (!user || !pass) { showAuthError('⚠️ Ingresa credenciales válidas.'); return; }
             rdb.ref('users/' + user).once('value', snapshot => {
                 if (snapshot.exists()) { showAuthError('⚠️ El usuario ya existe.'); return; }
@@ -785,6 +990,15 @@
                     currentUser = user;
                     currentPassword = pass;
                     heroesList = [];
+
+                    if (remember) {
+                        localStorage.setItem('wizz_remember_user', user);
+                        localStorage.setItem('wizz_remember_pass', pass);
+                    } else {
+                        localStorage.removeItem('wizz_remember_user');
+                        localStorage.removeItem('wizz_remember_pass');
+                    }
+
                     document.getElementById('auth-screen').classList.add('hidden');
                     openHeroSelector();
                 });
@@ -794,6 +1008,8 @@
         function logout() {
             currentUser = null;
             currentPassword = null;
+            localStorage.removeItem('wizz_remember_user');
+            localStorage.removeItem('wizz_remember_pass');
             if (timerInterval) clearInterval(timerInterval);
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('hero-select-screen').classList.add('hidden');
@@ -837,6 +1053,8 @@
             }
             if (heroesList.length >= 3) document.getElementById('create-hero-section').classList.add('hidden');
             else document.getElementById('create-hero-section').classList.remove('hidden');
+            
+            selectClass('PromptEngineer');
         }
 
         function confirmDeleteHero(index) {
@@ -852,13 +1070,15 @@
 
         function selectClass(className) {
             selectedNewClass = className;
-            ['PromptEngineer', 'AISwarmMaster', 'QuantumArchitect'].forEach(c => {
+            ['PromptEngineer', 'AISwarmMaster', 'QuantumArchitect', 'CyberSamurai', 'NeuralHacker', 'VoidWeaver'].forEach(c => {
                 const btn = document.getElementById('class-btn-' + c);
-                btn.className = (c === className) 
-                    ? "class-btn p-1.5 rounded-xl border border-cyber-neonCyan bg-cyber-neonCyan/20 text-cyber-neonCyan text-[9px] font-bold font-orbitron transition text-center"
-                    : "class-btn p-1.5 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[9px] font-bold font-orbitron transition text-center";
+                if (btn) {
+                    btn.className = (c === className) 
+                        ? "class-btn p-1.5 rounded-xl border border-cyber-neonCyan bg-cyber-neonCyan/20 text-cyber-neonCyan text-[8px] font-bold font-orbitron transition text-center truncate"
+                        : "class-btn p-1.5 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[8px] font-bold font-orbitron transition text-center truncate";
+                }
             });
-            document.getElementById('class-description-box').innerHTML = classDescriptions[className];
+            document.getElementById('class-description-box').innerHTML = classDescriptions[className] || classDescriptions['PromptEngineer'];
         }
 
         function createNewHero() {
@@ -870,14 +1090,17 @@
             checkGlobalHeroNameUnique(name, isUnique => {
                 if (!isUnique) {
                     errBox.innerText = "❌ El nombre ya está registrado globalmente.";
-                    errBox.classList.add('hidden');
+                    errBox.classList.remove('hidden');
                     return;
                 }
                 errBox.classList.add('hidden');
                 
-                let initialSkillId = 'pe3';
-                if (selectedNewClass === 'AISwarmMaster') initialSkillId = 'as3';
-                if (selectedNewClass === 'QuantumArchitect') initialSkillId = 'qa3';
+                let initialSkillId = 'class_skill_pe';
+                if (selectedNewClass === 'AISwarmMaster') initialSkillId = 'class_skill_as';
+                else if (selectedNewClass === 'QuantumArchitect') initialSkillId = 'class_skill_qa';
+                else if (selectedNewClass === 'CyberSamurai') initialSkillId = 'class_skill_cs';
+                else if (selectedNewClass === 'NeuralHacker') initialSkillId = 'class_skill_nh';
+                else if (selectedNewClass === 'VoidWeaver') initialSkillId = 'class_skill_vw';
 
                 const newHero = {
                     name: name, class: selectedNewClass, level: 1, exp: 0, maxExp: 100, gold: 0, crystals: 0, rebirths: 0,
@@ -903,6 +1126,18 @@
             gameData = heroesList[index];
             currentViewingTower = Math.max(1, gameData.currentTower > 0 ? gameData.currentTower : gameData.maxUnlockedTower);
             if (!gameData.equippedSkills) gameData.equippedSkills = [null, null, null, null, null];
+            
+            let starterKey = 'class_skill_pe';
+            if (gameData.class === 'AISwarmMaster') starterKey = 'class_skill_as';
+            else if (gameData.class === 'QuantumArchitect') starterKey = 'class_skill_qa';
+            else if (gameData.class === 'CyberSamurai') starterKey = 'class_skill_cs';
+            else if (gameData.class === 'NeuralHacker') starterKey = 'class_skill_nh';
+            else if (gameData.class === 'VoidWeaver') starterKey = 'class_skill_vw';
+
+            if (!gameData.equippedSkills.includes(starterKey) && gameData.equippedSkills[0] === null) {
+                gameData.equippedSkills[0] = starterKey;
+            }
+
             if (!gameData.recoveryUntil) gameData.recoveryUntil = 0;
             if (!gameData.deathsCount) gameData.deathsCount = 0;
             if (!gameData.voluntaryRetreatsCount) gameData.voluntaryRetreatsCount = 0;
@@ -1054,11 +1289,14 @@
             `;
         }
 
+        let bossAnnouncementTimer = null;
+
         function spawnEnemy() {
             const isNave = (gameData.currentTower === 0);
             const isBoss = (gameData.currentStage === 10 && !isNave);
 
             updateNavTabVisuals(isNave);
+            activeDotsList = [];
 
             let timeMultiplier = 1;
             if (gameData.shardShop) {
@@ -1074,6 +1312,7 @@
 
             bossFightActive = isBoss;
             const minigameBox = document.getElementById('boss-minigame-box');
+            const announcementBanner = document.getElementById('boss-announcement-banner');
             const returnNaveBtn = document.getElementById('return-nave-btn');
             const challengeBtn = document.getElementById('boss-challenge-btn');
             const recoveryBanner = document.getElementById('recovery-banner');
@@ -1082,6 +1321,9 @@
             const repairButtonWrapper = document.getElementById('repair-button-wrapper');
             const hpWrapper = document.getElementById('enemy-hp-wrapper');
             
+            if (bossAnnouncementTimer) clearTimeout(bossAnnouncementTimer);
+            announcementBanner.classList.add('hidden');
+
             const now = Date.now();
             const activeRecovery = gameData.recoveryUntil && gameData.recoveryUntil > now;
 
@@ -1119,6 +1361,21 @@
                 
                 if (isBoss) {
                     returnNaveBtn.classList.add('hidden');
+                    if (Math.random() < 0.5) {
+                        const announcements = [
+                            "⚠️ ¡El boss está preparando un escudo defensivo cuántico!",
+                            "⚠️ ¡El boss está preparando una red anti-hackeo de contención!",
+                            "⚠️ ¡El boss está sobrecargando su núcleo de contrafuego!"
+                        ];
+                        const chosenAnnounce = announcements[Math.floor(Math.random() * announcements.length)];
+                        bossAnnouncementTimer = setTimeout(() => {
+                            if (bossFightActive) {
+                                announcementBanner.innerText = chosenAnnounce;
+                                announcementBanner.classList.remove('hidden');
+                                enemyTimer += 4;
+                            }
+                        }, 2500);
+                    }
                 } else {
                     returnNaveBtn.classList.remove('hidden');
                 }
@@ -1250,7 +1507,7 @@
         }
 
         function initBossMinigame() {
-            minigameType = Math.floor(Math.random() * 3);
+            minigameType = Math.floor(Math.random() * 5);
             const titleEl = document.getElementById('minigame-title');
             const contentEl = document.getElementById('minigame-content');
             contentEl.innerHTML = '';
@@ -1259,30 +1516,57 @@
                 titleEl.innerText = "🛡️ ORDENA NODOS (1, 2, 3)";
                 minigameState = { seq: [1, 2, 3], idx: 0 };
                 [1, 2, 3].sort(() => Math.random() - 0.5).forEach(num => {
-                    contentEl.innerHTML += `<button onclick="clickMinigameBtn(${num})" class="w-6 h-6 bg-cyber-neonPink text-black font-bold rounded font-orbitron shadow text-[10px]">${num}</button>`;
+                    contentEl.innerHTML += `<button id="ord-btn-${num}" onclick="clickMinigameBtn(${num})" class="w-7 h-7 bg-cyber-neonPink text-black font-extrabold rounded font-orbitron shadow text-xs transition">${num}</button>`;
                 });
             } else if (minigameType === 1) {
-                titleEl.innerText = "🛡️ SINCRONIZADOR";
-                contentEl.innerHTML = `<div class="w-36 bg-cyber-bg h-3.5 rounded relative overflow-hidden cursor-pointer border border-cyber-neonCyan" onclick="clickSliderSync(event)"><div id="slider-cursor" class="absolute w-2 h-full bg-cyber-neonYellow animate-pulse" style="left: 50%;"></div><span class="absolute inset-0 text-[8px] text-center leading-3.5 text-white">Click centro</span></div>`;
-            } else {
-                titleEl.innerText = "🛡️ CÁLCULO";
+                titleEl.innerText = "🛡️ SINCRONIZADOR DINÁMICO";
+                contentEl.innerHTML = `<div class="w-40 bg-cyber-bg h-4 rounded-full relative overflow-hidden cursor-pointer border border-cyber-neonCyan shadow-inner" onclick="clickSliderSync(event)"><div id="slider-cursor" class="absolute w-3.5 h-full bg-cyber-neonYellow animate-bounce" style="left: 30%;"></div><span class="absolute inset-0 text-[8px] text-center leading-4 text-white font-bold">Click centro</span></div>`;
+            } else if (minigameType === 2) {
+                titleEl.innerText = "🛡️ CÁLCULO DE RED";
                 const a = Math.floor(Math.random() * 8) + 3;
                 const b = Math.floor(Math.random() * 4) + 2;
                 minigameState = { answer: a * b };
                 contentEl.innerHTML = `<span class="text-[10px] text-cyber-neonYellow font-orbitron">${a}×${b}=?</span> <input type="number" id="math-ans-input" class="w-10 bg-cyber-bg border border-cyber-border rounded px-1 text-[10px] text-white" /><button onclick="submitMathAns()" class="px-1.5 py-0.2 bg-cyber-neonCyan text-black text-[9px] font-bold rounded">OK</button>`;
+            } else if (minigameType === 3) {
+                titleEl.innerText = "🛡️ INTERRUPCIÓN DE HACK";
+                contentEl.innerHTML = `<button onclick="passNewBossMinigame()" class="px-3 py-1 bg-cyber-neonPink text-black font-extrabold rounded-lg text-[9px] font-orbitron animate-pulse shadow-neon-pink">¡INTERRUMPIR!</button>`;
+            } else {
+                titleEl.innerText = "🛡️ PURGAR PUERTO PAR";
+                const targetNum = Math.random() < 0.5 ? 4 : 7;
+                minigameState = { target: targetNum };
+                contentEl.innerHTML = `<span class="text-[9px] text-cyber-neonCyan font-orbitron">¿Es ${targetNum} par?</span> <button onclick="answerParity(true)" class="px-2 py-0.5 bg-green-600 text-white font-bold rounded text-[8px]">SÍ</button> <button onclick="answerParity(false)" class="px-2 py-0.5 bg-red-600 text-white font-bold rounded text-[8px]">NO</button>`;
             }
         }
 
         function clickMinigameBtn(num) {
+            const btn = document.getElementById(`ord-btn-${num}`);
             if (minigameState.seq[minigameState.idx] === num) {
+                if (btn) {
+                    btn.classList.remove('bg-cyber-neonPink');
+                    btn.classList.add('bg-green-400', 'text-slate-950', 'opacity-50');
+                    btn.innerText = '✓';
+                }
                 minigameState.idx++;
                 if (minigameState.idx >= minigameState.seq.length) {
                     document.getElementById('boss-minigame-box').classList.add('hidden');
+                    document.getElementById('boss-announcement-banner').classList.add('hidden');
                     bossFightActive = false;
                 }
             } else {
                 minigameState.idx = 0;
-                enemyTimer += 5;
+                enemyTimer += 3;
+                if (btn) {
+                    btn.classList.add('bg-red-600', 'animate-bounce');
+                    setTimeout(() => btn.classList.remove('bg-red-600', 'animate-bounce'), 400);
+                }
+                showSkillActionEffect("¡FALLO! +3s", "pink", "+3s");
+                [1, 2, 3].forEach(n => {
+                    const b = document.getElementById(`ord-btn-${n}`);
+                    if (b) {
+                        b.className = "w-7 h-7 bg-cyber-neonPink text-black font-extrabold rounded font-orbitron shadow text-xs transition";
+                        b.innerText = n;
+                    }
+                });
             }
         }
 
@@ -1290,11 +1574,13 @@
             const rect = e.currentTarget.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const pct = clickX / rect.width;
-            if (pct >= 0.4 && pct <= 0.6) {
+            if (pct >= 0.35 && pct <= 0.65) {
                 document.getElementById('boss-minigame-box').classList.add('hidden');
+                document.getElementById('boss-announcement-banner').classList.add('hidden');
                 bossFightActive = false;
             } else {
-                enemyTimer += 5;
+                enemyTimer += 4;
+                showSkillActionEffect("¡FALLO SYNC! +4s", "pink", "+4s");
             }
         }
 
@@ -1302,9 +1588,29 @@
             const val = parseInt(document.getElementById('math-ans-input').value);
             if (val === minigameState.answer) {
                 document.getElementById('boss-minigame-box').classList.add('hidden');
+                document.getElementById('boss-announcement-banner').classList.add('hidden');
                 bossFightActive = false;
             } else {
-                enemyTimer += 5;
+                enemyTimer += 4;
+                showSkillActionEffect("¡FALLO CÁLCULO! +4s", "pink", "+4s");
+            }
+        }
+
+        function passNewBossMinigame() {
+            document.getElementById('boss-minigame-box').classList.add('hidden');
+            document.getElementById('boss-announcement-banner').classList.add('hidden');
+            bossFightActive = false;
+        }
+
+        function answerParity(isEvenGuess) {
+            const isActuallyEven = (minigameState.target % 2 === 0);
+            if (isEvenGuess === isActuallyEven) {
+                document.getElementById('boss-minigame-box').classList.add('hidden');
+                document.getElementById('boss-announcement-banner').classList.add('hidden');
+                bossFightActive = false;
+            } else {
+                enemyTimer += 3;
+                showSkillActionEffect("¡FALLO PUERTO! +3s", "pink", "+3s");
             }
         }
 
@@ -1322,7 +1628,20 @@
             if (gameData.currentTower > 0 && enemyHp > 0 && !bossFightActive) {
                 let dotVal = gameData.dotDamage || 0;
                 if (dotVal > 0) {
-                    damageEnemy(Math.max(1, Math.floor(dotVal * 0.35)));
+                    damageEnemy(Math.max(1, Math.floor(dotVal * 0.35)), false, true);
+                }
+
+                if (activeDotsList.length > 0) {
+                    activeDotsList.forEach(dot => {
+                        dot.timerCount++;
+                        if (dot.timerCount >= dot.interval) {
+                            dot.timerCount = 0;
+                            dot.ticksLeft--;
+                            damageEnemy(dot.damagePerTick, false, true);
+                            showSkillActionEffect(dot.name, 'violet', dot.damagePerTick);
+                        }
+                    });
+                    activeDotsList = activeDotsList.filter(d => d.ticksLeft > 0);
                 }
             }
 
@@ -1389,13 +1708,13 @@
             let isCrit = Math.random() * 100 < currentCrit;
             if (isCrit) finalTapDmg = Math.floor(finalTapDmg * (gameData.critDmgMult || 1.5));
 
-            damageEnemy(finalTapDmg);
+            damageEnemy(finalTapDmg, isCrit, false);
             showFloatingDmg(event, (isCrit ? '💥 CRIT! +' : '+') + finalTapDmg, isCrit);
             checkAchievementProgress('ach1', 1);
             checkAchievementProgress('ach6', 1);
         }
 
-        function damageEnemy(amount) {
+        function damageEnemy(amount, isCrit = false, isDot = false) {
             if (bossFightActive) return;
             enemyHp -= amount;
             if (enemyHp <= 0) {
@@ -1415,34 +1734,36 @@
             else if (colorType === 'pink') colorHex = '#ff007f';
             else if (colorType === 'cyan') colorHex = '#00f0ff';
 
-            el.className = `absolute font-orbitron floating-skill-text text-xs sm:text-sm`;
+            el.className = `absolute font-orbitron floating-skill-text`;
             el.style.color = colorHex;
             el.style.left = '50%';
-            el.style.top = '40%';
+            el.style.top = '45%';
             el.style.transform = 'translate(-50%, -50%)';
             el.innerHTML = `⚡ ${skillName} <span class="text-white">(-${damageValue})</span>`;
             container.appendChild(el);
-            setTimeout(() => el.remove(), 1600);
+            setTimeout(() => el.remove(), 1400);
         }
 
         function showRewardPopups(earnedHype, earnedExp) {
             const container = document.getElementById('floating-text-container');
             
             const expEl = document.createElement('div');
-            expEl.className = `absolute font-orbitron font-bold text-slate-400 text-[10px] floating-dmg`;
+            expEl.className = `absolute font-orbitron font-bold text-slate-300 floating-dmg`;
             expEl.style.left = '35%';
             expEl.style.top = '50%';
+            expEl.style.transform = 'translate(-50%, -50%)';
             expEl.innerText = `+${earnedExp} EXP`;
             container.appendChild(expEl);
-            setTimeout(() => expEl.remove(), 1600);
+            setTimeout(() => expEl.remove(), 1400);
 
             const hypeEl = document.createElement('div');
-            hypeEl.className = `absolute font-orbitron font-bold text-[#f3e600] text-[10px] floating-dmg`;
+            hypeEl.className = `absolute font-orbitron font-bold text-[#f3e600] floating-dmg`;
             hypeEl.style.left = '65%';
             hypeEl.style.top = '50%';
+            hypeEl.style.transform = 'translate(-50%, -50%)';
             hypeEl.innerText = `+${earnedHype} Hype`;
             container.appendChild(hypeEl);
-            setTimeout(() => hypeEl.remove(), 1600);
+            setTimeout(() => hypeEl.remove(), 1400);
         }
 
         function defeatEnemy() {
@@ -1519,13 +1840,14 @@
         function showFloatingDmg(event, text, isCrit) {
             const container = document.getElementById('floating-text-container');
             const el = document.createElement('div');
-            el.className = `absolute font-orbitron font-bold ${isCrit ? 'text-cyber-neonPink text-sm' : 'text-cyber-neonCyan text-xs'} floating-dmg`;
+            el.className = `absolute font-orbitron font-extrabold ${isCrit ? 'text-cyber-neonPink text-lg sm:text-xl' : 'text-cyber-neonCyan text-sm sm:text-base'} floating-dmg`;
             const rect = event.currentTarget.getBoundingClientRect();
             el.style.left = (event.clientX ? event.clientX - rect.left : rect.width / 2) + 'px';
             el.style.top = (event.clientY ? event.clientY - rect.top : rect.height / 2) + 'px';
+            el.style.transform = 'translate(-50%, -50%)';
             el.innerText = text;
             container.appendChild(el);
-            setTimeout(() => el.remove(), 1600);
+            setTimeout(() => el.remove(), 1400);
         }
 
         function updateEnemyHpUI() {
@@ -1614,10 +1936,24 @@
             if (tabName === 'Torre') { currentViewingTower = Math.max(1, gameData.currentTower > 0 ? gameData.currentTower : gameData.maxUnlockedTower); renderStagesGrid(); }
             else if (tabName === 'Skills') { renderSkillSubTabs(); renderSkillBranchTree(); renderActionBar(); renderConfigBar(); }
             else if (tabName === 'Mejoras') { renderUpgrades(); }
-            else if (tabName === 'ShardShop') { renderShardShop(); }
+            else if (tabName === 'ShardShop') { switchShardTab(activeShardSubTab); }
             else if (tabName === 'Rebirth') { renderRebirthScreen(); }
             else if (tabName === 'Logros') { renderAchievements(); }
             else if (tabName === 'Global') { loadGlobalRanking(); }
+        }
+
+        function switchShardTab(subCat) {
+            activeShardSubTab = subCat;
+            ['shop', 'exchange'].forEach(c => {
+                const btn = document.getElementById('shard-subtab-' + c);
+                if (btn) btn.className = (c === subCat) ? "px-2 py-0.5 bg-cyber-neonCyan text-black rounded text-[9px] font-bold font-orbitron" : "px-2 py-0.5 bg-cyber-bg text-slate-400 rounded text-[9px] font-bold font-orbitron";
+                const subContent = document.getElementById('shard-subcontent-' + c);
+                if (subContent) {
+                    if (c === subCat) subContent.classList.remove('hidden');
+                    else subContent.classList.add('hidden');
+                }
+            });
+            if (subCat === 'shop') renderShardShop();
         }
 
         function updateUI() {
@@ -1667,23 +2003,20 @@
         }
 
         function getCalculatedSkillTooltip(node) {
-            if (!node.mult) return node.desc;
-            let computedValue = 0;
-            let statLabel = '';
-            if (node.stat === 'damage') {
-                computedValue = Math.floor(gameData.damage * node.mult);
-                statLabel = 'daño de click';
-            } else if (node.stat === 'dot') {
-                computedValue = Math.floor((gameData.dotDamage || 10) * node.mult);
-                statLabel = 'daño DOT';
-            } else if (node.stat === 'crit') {
-                computedValue = Math.floor((gameData.damage * (gameData.critDmgMult || 1.5)) * node.mult);
-                statLabel = 'daño crítico';
-            } else if (node.stat === 'level') {
-                computedValue = gameData.level * node.mult;
-                statLabel = 'nivel del nodo';
+            const currentLvl = (gameData.unlockedSkills && gameData.unlockedSkills[node.id]) || 0;
+            const nextLvl = currentLvl + 1;
+            
+            let currentVal = node.baseVal + (currentLvl > 0 ? (currentLvl - 1) * node.scaling : 0);
+            let nextVal = node.baseVal + (currentLvl * node.scaling);
+
+            let textDesc = node.desc;
+            if (textDesc.includes('<val>')) {
+                textDesc = textDesc.replace(/<val>/g, `<span class="text-cyber-neonCyan font-bold">${currentVal}</span>`);
+                if (nextLvl <= node.max) {
+                    textDesc += ` <span class="text-slate-400 text-[8px] block mt-0.5">(Siguiente Nv.${nextLvl}: <span class="text-cyber-neonYellow">+${nextVal}</span>)</span>`;
+                }
             }
-            return `Inflige <span style="color:#00f0ff; font-weight:bold;">${computedValue}</span> de daño basado en <span style="color:#ff007f;">${statLabel}</span> (${node.mult}x).`;
+            return textDesc;
         }
 
         function renderSkillBranchTree() {
@@ -1746,7 +2079,7 @@
                     <div class="font-bold text-[8px] truncate w-full font-orbitron">${node.name}</div>
                     <div class="text-[8px] font-mono">${currentLvl}/${node.max}</div>
                     
-                    <div class="tooltip-box absolute left-0 bottom-full mb-2 w-40 bg-cyber-panel border border-cyber-neonCyan rounded-xl p-1.5 text-[9px] text-slate-200 shadow-2xl text-left">
+                    <div class="tooltip-box absolute left-0 bottom-full mb-2 w-44 bg-cyber-panel border border-cyber-neonCyan rounded-xl p-2 text-[9px] text-slate-200 shadow-2xl text-left">
                         <div class="font-bold text-cyber-neonCyan mb-0.5 font-orbitron">${node.name} (${currentLvl}/${node.max})</div>
                         <div class="text-slate-300 mb-1">${descHtml}</div>
                         ${node.type === 'active' ? '<div class="text-cyber-neonYellow text-[8px]">⚡ Habilidad Activa</div>' : ''}
@@ -1759,18 +2092,35 @@
             renderConfigBar();
         }
 
-        renderActionBar = function() {
+        function getAllActiveNodesList() {
+            const classDef = classDefinitions[gameData.class] || classDefinitions['PromptEngineer'];
+            let activeNodes = [];
+            
+            const starter = getClassSpecificStarterSkill(gameData.class);
+            activeNodes.push(starter);
+
+            classDef.branches.forEach(b => {
+                b.nodes.forEach(n => {
+                    if (n.type === 'active' && (gameData.unlockedSkills[n.id] || 0) > 0) {
+                        let lvl = gameData.unlockedSkills[n.id];
+                        let calculatedDmg = n.baseDmg ? (n.baseDmg + (lvl - 1) * n.scalingDmg) : null;
+                        let clonedNode = { ...n };
+                        if (calculatedDmg) {
+                            clonedNode.dotDmg = calculatedDmg;
+                            clonedNode.desc = clonedNode.desc.replace(/<val>/g, calculatedDmg);
+                        }
+                        activeNodes.push(clonedNode);
+                    }
+                });
+            });
+            return activeNodes;
+        }
+
+        function renderActionBar() {
             const bar = document.getElementById('skill-action-bar');
             if (!bar) return;
             bar.innerHTML = '';
-            const classDef = classDefinitions[gameData.class] || classDefinitions['PromptEngineer'];
-
-            let activeNodes = [];
-            classDef.branches.forEach(b => {
-                b.nodes.forEach(n => {
-                    if (n.type === 'active' && (gameData.unlockedSkills[n.id] || 0) > 0) activeNodes.push(n);
-                });
-            });
+            let activeNodes = getAllActiveNodesList();
 
             for (let i = 0; i < 5; i++) {
                 const equippedId = gameData.equippedSkills[i];
@@ -1778,22 +2128,28 @@
                 const cdRemaining = matchedNode ? (skillCooldowns[matchedNode.id] || 0) : 0;
                 const descHtml = matchedNode ? getCalculatedSkillTooltip(matchedNode) : '';
 
-                bar.innerHTML += `
-                    <div class="tooltip-container h-10 bg-cyber-bg border border-cyber-border rounded-lg flex flex-col items-center justify-center text-[8px] relative cursor-pointer hover:border-cyber-neonCyan transition overflow-hidden p-0.5" onclick="useEquippedSkill(${i})">
-                        ${cdRemaining > 0 ? `<div class="absolute inset-0 bg-slate-950/80 flex items-center justify-center text-cyber-neonPink font-mono font-bold text-[10px] z-10">${cdRemaining}s</div>` : ''}
-                        <span class="text-[6px] font-bold font-orbitron text-cyber-neonYellow z-0 pointer-events-none">[${i+1}]</span>
-                        <span class="text-cyber-neonCyan font-orbitron font-bold z-0 text-[7px] truncate w-full text-center pointer-events-none">${matchedNode ? matchedNode.name.substring(0, 5) : 'Vacío'}</span>
-                        
-                        ${matchedNode ? `
+                if (matchedNode) {
+                    bar.innerHTML += `
+                        <div class="tooltip-container h-10 bg-cyber-bg border border-cyber-border rounded-lg flex flex-col items-center justify-center text-[8px] relative cursor-pointer hover:border-cyber-neonCyan transition overflow-hidden p-0.5" onclick="useEquippedSkill(${i})">
+                            ${cdRemaining > 0 ? `<div class="absolute inset-0 bg-slate-950/80 flex items-center justify-center text-cyber-neonPink font-mono font-bold text-[10px] z-10">${cdRemaining}s</div>` : ''}
+                            <span class="text-[6px] font-bold font-orbitron text-cyber-neonYellow z-0 pointer-events-none">[${i+1}]</span>
+                            <span class="text-cyber-neonCyan font-orbitron font-bold z-0 text-[7px] truncate w-full text-center pointer-events-none">${matchedNode.name.substring(0, 5)}</span>
                             <div class="tooltip-box absolute left-0 bottom-full mb-1 w-36 bg-cyber-panel border border-cyber-neonCyan rounded-xl p-1.5 text-[9px] text-slate-200 shadow-2xl text-left pointer-events-none">
                                 <span class="text-cyber-neonYellow font-bold">[SKILL ACTIVO]</span><br>
                                 <strong class="text-cyber-neonCyan">${matchedNode.name}</strong><br>
                                 ${descHtml}<br>
                                 <span class="text-cyber-neonYellow">CD: ${matchedNode.cd}s</span>
                             </div>
-                        ` : ''}
-                    </div>
-                `;
+                        </div>
+                    `;
+                } else {
+                    bar.innerHTML += `
+                        <div class="h-10 bg-black/60 border border-cyber-border/40 rounded-lg flex flex-col items-center justify-center text-[8px] relative opacity-50">
+                            <span class="text-[6px] font-bold font-orbitron text-slate-600">[${i+1}]</span>
+                            <div class="w-3 h-3 bg-cyber-border/30 rounded-sm mt-0.5"></div>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -1802,11 +2158,8 @@
             const equippedId = gameData.equippedSkills[slotIndex];
             if (!equippedId) return;
 
-            const classDef = classDefinitions[gameData.class] || classDefinitions['PromptEngineer'];
-            let matchedNode = null;
-            classDef.branches.forEach(b => {
-                b.nodes.forEach(n => { if (n.id === equippedId) matchedNode = n; });
-            });
+            let activeNodes = getAllActiveNodesList();
+            let matchedNode = activeNodes.find(n => n.id === equippedId);
 
             if (!matchedNode) return;
             if ((skillCooldowns[matchedNode.id] || 0) > 0) return;
@@ -1820,66 +2173,72 @@
             renderActionBar();
             renderConfigBar();
 
-            let skillDmg = gameData.damage * 4;
-            if (matchedNode.mult) {
-                if (matchedNode.stat === 'damage') skillDmg = Math.floor(gameData.damage * matchedNode.mult);
-                else if (matchedNode.stat === 'dot') skillDmg = Math.floor((gameData.dotDamage || 10) * matchedNode.mult);
-                else if (matchedNode.stat === 'crit') skillDmg = Math.floor((gameData.damage * (gameData.critDmgMult || 1.5)) * matchedNode.mult);
-                else if (matchedNode.stat === 'level') {
-                    gameData.gold += gameData.level * matchedNode.mult;
-                    skillDmg = gameData.damage * 2;
+            if (matchedNode.dotTicks) {
+                let currentLvl = gameData.unlockedSkills[matchedNode.id] || 1;
+                let tickDmg = matchedNode.dotDmg || (matchedNode.baseDmg + (currentLvl - 1) * (matchedNode.scalingDmg || 3));
+                
+                activeDotsList.push({
+                    name: matchedNode.name,
+                    ticksLeft: matchedNode.dotTicks,
+                    interval: matchedNode.dotInterval || 2,
+                    timerCount: 0,
+                    damagePerTick: tickDmg
+                });
+                showSkillActionEffect(matchedNode.name + " (DOT activo)", matchedNode.colorType || 'violet', tickDmg + " / 2s");
+            } else {
+                let skillDmg = gameData.damage * 4;
+                if (matchedNode.mult) {
+                    if (matchedNode.stat === 'damage') skillDmg = Math.floor(gameData.damage * matchedNode.mult);
+                    else if (matchedNode.stat === 'dot') skillDmg = Math.floor((gameData.dotDamage || 10) * matchedNode.mult);
+                    else if (matchedNode.stat === 'crit') skillDmg = Math.floor((gameData.damage * (gameData.critDmgMult || 1.5)) * matchedNode.mult);
+                    else if (matchedNode.stat === 'level') {
+                        gameData.gold += gameData.level * matchedNode.mult;
+                        skillDmg = gameData.damage * 2;
+                    }
                 }
+                showSkillActionEffect(matchedNode.name, matchedNode.colorType || 'cyan', skillDmg);
+                damageEnemy(skillDmg);
             }
-
-            showSkillActionEffect(matchedNode.name, matchedNode.colorType || 'cyan', skillDmg);
-            damageEnemy(skillDmg);
         }
 
-        renderConfigBar = function() {
+        function renderConfigBar() {
             const bar = document.getElementById('skill-config-bar');
             if (!bar) return;
             bar.innerHTML = '';
-            const classDef = classDefinitions[gameData.class] || classDefinitions['PromptEngineer'];
-
-            let activeNodes = [];
-            classDef.branches.forEach(b => {
-                b.nodes.forEach(n => {
-                    if (n.type === 'active' && (gameData.unlockedSkills[n.id] || 0) > 0) activeNodes.push(n);
-                });
-            });
+            let activeNodes = getAllActiveNodesList();
 
             for (let i = 0; i < 5; i++) {
                 const equippedId = gameData.equippedSkills[i];
                 const matchedNode = activeNodes.find(n => n.id === equippedId);
                 const descHtml = matchedNode ? getCalculatedSkillTooltip(matchedNode) : '';
 
-                bar.innerHTML += `
-                    <div class="tooltip-container h-10 bg-cyber-bg border border-cyber-border rounded-lg flex flex-col items-center justify-center text-[8px] relative cursor-pointer hover:border-cyber-neonCyan transition p-0.5" onclick="openInlineSelector(${i})">
-                        <span class="text-[6px] font-bold font-orbitron text-cyber-neonYellow pointer-events-none">[${i+1}]</span>
-                        <span class="text-cyber-neonCyan font-orbitron font-bold text-[7px] truncate w-full text-center pointer-events-none">${matchedNode ? matchedNode.name.substring(0, 5) : 'Asignar'}</span>
-
-                        ${matchedNode ? `
+                if (matchedNode) {
+                    bar.innerHTML += `
+                        <div class="tooltip-container h-10 bg-cyber-bg border border-cyber-border rounded-lg flex flex-col items-center justify-center text-[8px] relative cursor-pointer hover:border-cyber-neonCyan transition p-0.5" onclick="openInlineSelector(${i})">
+                            <span class="text-[6px] font-bold font-orbitron text-cyber-neonYellow pointer-events-none">[${i+1}]</span>
+                            <span class="text-cyber-neonCyan font-orbitron font-bold text-[7px] truncate w-full text-center pointer-events-none">${matchedNode.name.substring(0, 5)}</span>
                             <div class="tooltip-box absolute left-0 bottom-full mb-1 w-36 bg-cyber-panel border border-cyber-neonCyan rounded-xl p-1.5 text-[9px] text-slate-200 shadow-2xl text-left pointer-events-none">
                                 <span class="text-cyber-neonYellow font-bold">[SKILL ACTIVO]</span><br>
                                 <strong class="text-cyber-neonCyan">${matchedNode.name}</strong><br>
                                 ${descHtml}<br>
                                 <span class="text-cyber-neonYellow">CD: ${matchedNode.cd}s</span>
                             </div>
-                        ` : ''}
-                    </div>
-                `;
+                        </div>
+                    `;
+                } else {
+                    bar.innerHTML += `
+                        <div class="h-10 bg-black/60 border border-cyber-border/40 rounded-lg flex flex-col items-center justify-center text-[8px] relative cursor-pointer hover:border-cyber-neonCyan transition p-0.5" onclick="openInlineSelector(${i})">
+                            <span class="text-[6px] font-bold font-orbitron text-slate-500">[${i+1}]</span>
+                            <span class="text-[7px] text-slate-400 font-orbitron">Asignar</span>
+                        </div>
+                    `;
+                }
             }
         }
 
         function openInlineSelector(slotIndex) {
             activeSelectingSlot = slotIndex;
-            const classDef = classDefinitions[gameData.class] || classDefinitions['PromptEngineer'];
-            let activeNodes = [];
-            classDef.branches.forEach(b => {
-                b.nodes.forEach(n => {
-                    if (n.type === 'active' && (gameData.unlockedSkills[n.id] || 0) > 0) activeNodes.push(n);
-                });
-            });
+            let activeNodes = getAllActiveNodesList();
 
             const availableNodes = activeNodes.filter(n => !gameData.equippedSkills.includes(n.id) || gameData.equippedSkills[slotIndex] === n.id);
             const selectorBox = document.getElementById('inline-skill-selector');
@@ -1920,15 +2279,15 @@
             saveGameToCloud();
         }
 
-        // Event listeners mejorados para Mouse y Touch en el árbol de Skills
         const viewport = document.getElementById('skill-tree-viewport');
-        
-        viewport.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.tooltip-container')) return;
-            isPanning = true;
-            startX = e.clientX - treeTranslateX;
-            startY = e.clientY - treeTranslateY;
-        });
+        if (viewport) {
+            viewport.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.tooltip-container')) return;
+                isPanning = true;
+                startX = e.clientX - treeTranslateX;
+                startY = e.clientY - treeTranslateY;
+            });
+        }
 
         window.addEventListener('mousemove', (e) => {
             if (!isPanning) return;
@@ -1939,23 +2298,25 @@
 
         window.addEventListener('mouseup', () => { isPanning = false; });
 
-        viewport.addEventListener('touchstart', (e) => {
-            if (e.target.closest('.tooltip-container')) return;
-            if (e.touches.length === 1) {
-                isPanning = true;
-                startX = e.touches[0].clientX - treeTranslateX;
-                startY = e.touches[0].clientY - treeTranslateY;
-            }
-        }, { passive: true });
+        if (viewport) {
+            viewport.addEventListener('touchstart', (e) => {
+                if (e.target.closest('.tooltip-container')) return;
+                if (e.touches.length === 1) {
+                    isPanning = true;
+                    startX = e.touches[0].clientX - treeTranslateX;
+                    startY = e.touches[0].clientY - treeTranslateY;
+                }
+            }, { passive: true });
 
-        viewport.addEventListener('touchmove', (e) => {
-            if (!isPanning || e.touches.length !== 1) return;
-            treeTranslateX = e.touches[0].clientX - startX;
-            treeTranslateY = e.touches[0].clientY - startY;
-            updateTreeTransform();
-        }, { passive: true });
+            viewport.addEventListener('touchmove', (e) => {
+                if (!isPanning || e.touches.length !== 1) return;
+                treeTranslateX = e.touches[0].clientX - startX;
+                treeTranslateY = e.touches[0].clientY - startY;
+                updateTreeTransform();
+            }, { passive: true });
 
-        viewport.addEventListener('touchend', () => { isPanning = false; });
+            viewport.addEventListener('touchend', () => { isPanning = false; });
+        }
 
         function zoomSkillTree(delta) {
             treeScale = Math.max(0.4, Math.min(1.5, treeScale + delta));
@@ -1964,7 +2325,7 @@
 
         function updateTreeTransform() {
             const canvas = document.getElementById('skill-tree-canvas');
-            canvas.style.transform = `translate(${treeTranslateX}px, ${treeTranslateY}px) scale(${treeScale})`;
+            if (canvas) canvas.style.transform = `translate(${treeTranslateX}px, ${treeTranslateY}px) scale(${treeScale})`;
         }
 
         function upgradeSkillBranch(skillId) {
@@ -1989,8 +2350,8 @@
             gameData.skillPoints--;
             gameData.unlockedSkills[skillId] = currentLvl + 1;
 
-            if (skillId.includes('pe') || skillId.includes('qa')) gameData.damage += 12;
-            else gameData.dps += 5;
+            if (skillId.includes('as') || skillId.includes('nh') || skillId.includes('va')) gameData.dotDamage += targetNode.scaling;
+            else gameData.damage += targetNode.scaling;
 
             updateUI();
             renderSkillBranchTree();
@@ -2005,11 +2366,12 @@
             gameData.gold -= resetCost;
             let totalRefund = 0;
             Object.keys(gameData.unlockedSkills).forEach(k => {
-                totalRefund += gameData.unlockedSkills[k];
+                if (!k.includes('class_skill')) {
+                    totalRefund += gameData.unlockedSkills[k];
+                    delete gameData.unlockedSkills[k];
+                }
             });
             gameData.skillPoints += totalRefund;
-            gameData.unlockedSkills = {};
-            gameData.equippedSkills = [null, null, null, null, null];
 
             document.getElementById('reset-cost-display').innerText = 50 * (gameData.skillResetsCount + 1);
             updateUI();
@@ -2021,13 +2383,14 @@
             activeUpgradeSubTab = cat;
             ['hardware', 'software'].forEach(c => {
                 const btn = document.getElementById('up-subtab-' + c);
-                btn.className = (c === cat) ? "px-2 py-0.5 bg-cyber-neonCyan text-black rounded text-[9px] font-bold font-orbitron" : "px-2 py-0.5 bg-cyber-bg text-slate-400 rounded text-[9px] font-bold font-orbitron";
+                if (btn) btn.className = (c === cat) ? "px-2 py-0.5 bg-cyber-neonCyan text-black rounded text-[9px] font-bold font-orbitron" : "px-2 py-0.5 bg-cyber-bg text-slate-400 rounded text-[9px] font-bold font-orbitron";
             });
             renderUpgrades();
         }
 
         function renderUpgrades() {
             const container = document.getElementById('upgrades-list');
+            if (!container) return;
             container.innerHTML = '';
             let discountMulti = 1;
             if (gameData.shardShop) {
@@ -2087,8 +2450,26 @@
             saveGameToCloud();
         }
 
+        function buyShardWithHype(amount) {
+            const cost = amount === 1 ? 5000 : 24000;
+            document.getElementById('cost-hype-1').innerText = 5000;
+            document.getElementById('cost-hype-5').innerText = 24000;
+
+            if (gameData.gold < cost) {
+                showCyberModal("HYPE INSUFICIENTE", `Necesitas ${cost} Hype para canjear ${amount} Shard(s).`, "💰");
+                return;
+            }
+            gameData.gold -= cost;
+            gameData.crystals = (gameData.crystals || 0) + amount;
+            updateUI();
+            renderShardShop();
+            saveGameToCloud();
+            showCyberModal("CANJE EXITOSO", `¡Obtuviste +${amount} Shard(s)!`, "💎");
+        }
+
         function renderShardShop() {
             const container = document.getElementById('shard-shop-list');
+            if (!container) return;
             container.innerHTML = '';
             gameData.shardShop.forEach((ss, idx) => {
                 const currentCost = Math.floor(ss.cost * Math.pow(ss.mult, ss.level));
@@ -2151,8 +2532,16 @@
             gameData.level = 1; gameData.exp = 0; gameData.maxExp = 100; gameData.gold = 0;
             gameData.currentTower = 0; gameData.currentStage = 1;
             gameData.damage = 1 + (gameData.rebirths * 3); gameData.dps = 0; gameData.skillPoints = 0;
-            gameData.unlockedSkills = {};
-            gameData.equippedSkills = [null, null, null, null, null];
+            
+            let starterKey = 'class_skill_pe';
+            if (gameData.class === 'AISwarmMaster') starterKey = 'class_skill_as';
+            else if (gameData.class === 'QuantumArchitect') starterKey = 'class_skill_qa';
+            else if (gameData.class === 'CyberSamurai') starterKey = 'class_skill_cs';
+            else if (gameData.class === 'NeuralHacker') starterKey = 'class_skill_nh';
+            else if (gameData.class === 'VoidWeaver') starterKey = 'class_skill_vw';
+
+            gameData.unlockedSkills = { [starterKey]: 1 };
+            gameData.equippedSkills = [starterKey, null, null, null, null];
             gameData.upgrades = JSON.parse(JSON.stringify(defaultUpgrades));
 
             checkAchievementProgress('ach3', 1);
@@ -2165,6 +2554,7 @@
 
         function renderAchievements() {
             const container = document.getElementById('achievements-list');
+            if (!container) return;
             container.innerHTML = '';
             gameData.achievements.forEach((ach, idx) => {
                 const canClaim = !ach.claimed && ach.progress >= ach.target;
@@ -2183,7 +2573,7 @@
         }
 
         function checkAchievementProgress(achId, value) {
-            if (!gameData.achievements) return;
+            if (!gameData || !gameData.achievements) return;
             const ach = gameData.achievements.find(a => a.id === achId);
             if (ach && !ach.claimed) {
                 ach.progress = Math.max(ach.progress, value);
@@ -2203,6 +2593,7 @@
 
         function loadGlobalRanking() {
             const listEl = document.getElementById('global-ranking-list');
+            if (!listEl) return;
             listEl.innerHTML = '<div class="text-center text-slate-500 py-2 font-orbitron text-[10px]">Cargando ranking...</div>';
             rdb.ref('users/').once('value', snapshot => {
                 const users = snapshot.val();
@@ -2269,14 +2660,32 @@
             }
         }
 
+        function checkAndLoadNextMusic(index) {
+            const testIndex = index + 1;
+            const testPath = `music${testIndex}.mp3`;
+            const audioCheck = new Audio();
+            audioCheck.src = testPath;
+            audioCheck.oncanplaythrough = () => {
+                if (!playlist.includes(testPath)) {
+                    playlist.push(testPath);
+                }
+                checkAndLoadNextMusic(testIndex);
+            };
+        }
+        checkAndLoadNextMusic(3);
+
         function loadTrack(index) {
             const audio = document.getElementById('game-audio');
+            if (!audio) return;
             currentTrackIndex = index % playlist.length;
             const trackName = playlist[currentTrackIndex];
             audio.src = trackName;
-            audio.volume = document.getElementById('volume-slider').value;
-            document.getElementById('current-track-name').innerText = trackName;
+            const volSlider = document.getElementById('volume-slider');
+            if (volSlider) audio.volume = volSlider.value;
+            const trackNameEl = document.getElementById('current-track-name');
+            if (trackNameEl) trackNameEl.innerText = trackName;
             audio.onended = () => { nextTrack(); };
+            audio.onerror = () => { nextTrack(); };
         }
 
         function nextTrack() {
@@ -2286,18 +2695,21 @@
                 currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
             }
             loadTrack(currentTrackIndex);
-            if (isPlayingMusic) document.getElementById('game-audio').play();
+            if (isPlayingMusic) {
+                const audio = document.getElementById('game-audio');
+                if (audio) audio.play();
+            }
         }
 
         function toggleShuffle() {
             isShuffle = !isShuffle;
             const btn = document.getElementById('shuffle-btn');
-            btn.style.color = isShuffle ? '#00f0ff' : '#94a3b8';
+            if (btn) btn.style.color = isShuffle ? '#00f0ff' : '#94a3b8';
         }
 
         function changeVolume(val) {
             const audio = document.getElementById('game-audio');
-            audio.volume = val;
+            if (audio) audio.volume = val;
         }
 
         function saveGameToCloud() {
