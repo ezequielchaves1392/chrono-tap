@@ -474,7 +474,7 @@
                         <div class="p-3 bg-cyber-bg rounded-xl border border-cyber-border">
                             <strong class="text-[#f3e600] block mb-1 font-orbitron">💰 Monedas y Divisas (Hype)</strong>
                             <ul class="list-disc list-inside space-y-1 text-slate-300">
-                                <li><strong>Hype:</strong> Divisa digital obtenida al vencer enemigos y mediante pasivas. Sirve para comprar mejoras de Hardware/Software y reparar la nave.</li>
+                                <li><strong>Hype:</strong> Divisa digital obtenida al vencer enemigos. Sirve para comprar mejoras de Hardware/Software y reparar la nave.</li>
                                 <li><strong>Shards (Microchips):</strong> Divisa de prestigio obtenida al hacer Singularidades o canjeándola por Hype. Permite comprar mejoras masivas permanentes.</li>
                             </ul>
                         </div>
@@ -485,8 +485,8 @@
                         </div>
 
                         <div class="p-3 bg-cyber-bg rounded-xl border border-cyber-border">
-                            <strong class="text-purple-400 block mb-1 font-orbitron">🌐 Sectores Deshabilitados</strong>
-                            Los sectores superiores están bloqueados al principio y se desbloquean a medida que avanzas y completas los nodos anteriores.
+                            <strong class="text-purple-400 block mb-1 font-orbitron">🌐 Sectores Dinámicos</strong>
+                            Los sectores superiores se desbloquean a medida que avanzas y completas los nodos anteriores.
                         </div>
                     </div>
                 </div>
@@ -588,10 +588,10 @@
         let isShuffle = false;
         let isPlayingMusic = false;
 
-        const sectorNames = [
-            "Nave Orbital", "Sector 1", "Sector 2", "Sector 3", "Sector 4",
-            "Sector 5", "Sector 6", "Sector 7", "Sector 8", "Sector 9", "Sector 10"
-        ];
+        function getSectorName(towerNum) {
+            if (towerNum === 0) return "Nave Orbital";
+            return `Sector ${towerNum}`;
+        }
 
         const classDescriptions = {
             PromptEngineer: "Arquitecto especialista en <span style='color: #ff007f; font-weight: bold;'>daño crítico masivo</span> y ráfagas de comandos.<br><br><b>Habilidad Inicial:</b> <span style='color: #00f0ff;'>Inyección Rápida</span>.",
@@ -902,13 +902,12 @@
             { id: 'gold1', cat: 'software', sector: 5, name: 'Algoritmo de <span style="color:#f3e600; font-weight:bold;">Monetización</span> (Sector 5)', cost: 60, mult: 1.52, level: 0, maxLevel: 20, desc: '+25% <span style="color:#f3e600; font-weight:bold;">Hype</span> obtenido' },
             { id: 'expboost', cat: 'software', sector: 6, name: 'Compilador de Experiencia (Sector 6)', cost: 80, mult: 1.55, level: 0, maxLevel: 20, desc: '+20% EXP obtenida' },
             { id: 'cooldownred', cat: 'software', sector: 7, name: 'Matriz de Enfriamiento (Sector 7)', cost: 120, mult: 1.6, level: 0, maxLevel: 15, desc: '-5% Cooldown de habilidades' },
-            { id: 'auto_hype', cat: 'software', sector: 9, name: 'Minero Cuántico Pasivo (Sector 9)', cost: 350, mult: 1.7, level: 0, maxLevel: 10, desc: '+10 <span style="color:#f3e600; font-weight:bold;">Hype</span> pasivo por segundo' },
             { id: 'omega_core', cat: 'software', sector: 10, name: 'Núcleo de Singularidad Omega (Sector 10)', cost: 600, mult: 1.8, level: 0, maxLevel: 5, desc: '+50% <span style="color:#ff007f;">Daño global multiplicativo</span>' }
         ];
 
         const defaultShardShop = [
             { id: 'ss1', name: 'Núcleo Cuántico Supremo', cost: 3, mult: 1.75, level: 0, max: 20, desc: '+25% <span style="color:#ff007f;">Daño global</span> multiplicativo.' },
-            { id: 'ss2', name: 'Sintetizador de <span style="color:#f3e600; font-weight:bold;">Hype</span>', cost: 4, mult: 1.7, level: 0, max: 15, desc: '+40% <span style="color:#f3e600; font-weight:bold;">Hype</span> pasivo y por combate.' },
+            { id: 'ss2', name: 'Sintetizador de <span style="color:#f3e600; font-weight:bold;">Hype</span>', cost: 4, mult: 1.7, level: 0, max: 15, desc: '+40% <span style="color:#f3e600; font-weight:bold;">Hype</span> por combate.' },
             { id: 'ss3', name: 'Acelerador de Latencia Cero', cost: 5, mult: 1.85, level: 0, max: 10, desc: 'Reduce un 8% el temporizador de enemigos.' },
             { id: 'ss4', name: 'Neurona de Experiencia Avanzada', cost: 4, mult: 1.65, level: 0, max: 15, desc: '+30% EXP obtenida por victoria.' },
             { id: 'ss5', name: 'Calibrador de <span style="color:#ff007f;">Crítico Absoluto</span>', cost: 6, mult: 1.9, level: 0, max: 10, desc: '+3% Probabilidad de <span style="color:#ff007f;">Crítico</span> permanente.' },
@@ -1261,12 +1260,12 @@
             if (tutorialSetting === 'false') return;
 
             if (!gameData.hasStartedTravel) {
-                showCyberModal("🛸 BIENVENIDO A LA NAVE ORBITAL", "Estás en tu base central. Aquí puedes ver tus estadísticas de hardware/software, reproducir música o iniciar tu incursión pulsando <b>'Iniciar viaje'</b>.<br><br>💡 <i>Los sectores superiores al principio se encuentran deshabilitados hasta que completes y desbloquees los anteriores.</i>", "📖");
+                showCyberModal("🛸 BIENVENIDO A LA NAVE ORBITAL", "Estás en tu base central. Aquí puedes ver tus estadísticas de hardware/software, reproducir música o iniciar tu incursión pulsando <b>'Iniciar viaje'</b>.", "📖");
             }
         }
 
         function triggerManualTutorial() {
-            showCyberModal("📖 GUÍA Y TUTORIAL NEURAL", "• <b>Hype:</b> Divisa digital que obtienes al vencer enemigos. Sirve para comprar Mejoras (Hardware/Software) y reparar la nave.<br><br>• <b>Tiempo y Muerte:</b> Cada nodo tiene un temporizador (⏱️). Si el tiempo se agota o mueres, la nave te regresará automáticamente un nodo hacia atrás y perderás una parte de Hype y EXP. Usa los botones de habilidades o haz clic para ejecutar prompts.<br><br>• <b>Sectores Deshabilitados:</b> Se desbloquean al avanzar por orden.<br><br>• <b>Skills y Mejoras:</b> Gana EXP subiendo de nivel para obtener Puntos de Algoritmo en tu árbol de habilidades.", "🎓");
+            showCyberModal("📖 GUÍA Y TUTORIAL NEURAL", "• <b>Hype:</b> Divisa digital que obtienes al vencer enemigos. Sirve para comprar Mejoras (Hardware/Software) y reparar la nave.<br><br>• <b>Tiempo y Muerte:</b> Cada nodo tiene un temporizador (⏱️). Si el tiempo se agota o mueres, la nave te regresará automáticamente un nodo hacia atrás y perderás una parte de Hype y EXP.<br><br>• <b>Sectores Dinámicos:</b> Se desbloquean al avanzar por orden.<br><br>• <b>Skills y Mejoras:</b> Gana EXP subiendo de nivel para obtener Puntos de Algoritmo en tu árbol de habilidades.", "🎓");
         }
 
         function toggleAnchorShip(isChecked) {
@@ -1492,7 +1491,7 @@
                 minigameBox.classList.add('hidden');
             }
 
-            const sectorText = gameData.currentTower <= 10 ? sectorNames[gameData.currentTower] : `Sector ${gameData.currentTower}`;
+            const sectorText = getSectorName(gameData.currentTower);
             document.getElementById('stage-badge').innerText = isNave ? `Nave de ${gameData.name}` : `${sectorText} • ${isBoss ? '🔥 JEFE' : 'Nodo ' + gameData.currentStage + '/10'}`;
             document.getElementById('enemy-name').innerText = isNave ? `Nave Orbital Central` : (isBoss ? `Firewall Central` : `Subrutina Hostil`);
             document.getElementById('enemy-lore').innerText = isNave ? "Centro de control orbital." : "Subrutina hostil bloqueando red.";
@@ -1531,7 +1530,7 @@
             const tutorialSetting = localStorage.getItem('wizz_tutorial_enabled');
             if (!gameData.tutorialSeenFirstTravel && tutorialSetting !== 'false') {
                 gameData.tutorialSeenFirstTravel = true;
-                showCyberModal("🚀 INICIO DE VIAJE E INCURSIÓN", "Has salido al sector de combate. Aquí verás el <b>Temporizador (⏱️)</b>: debes derrotar al enemigo antes de que llegue a cero. Si se agota o mueres, la nave te regresará automáticamente un nodo hacia atrás y perderás una parte de Hype y EXP. Usa los botones de habilidades o haz clic para ejecutar prompts.", "📖", () => {
+                showCyberModal("🚀 INICIO DE VIAJE E INCURSIÓN", "Has salido al sector de combate. Aquí verás el <b>Temporizador (⏱️)</b>: debes derrotar al enemigo antes de que llegue a cero. Si se agota o mueres, la nave te regresará automáticamente un nodo hacia atrás y perderás una parte de Hype y EXP.", "📖", () => {
                     proceedToBattleStart();
                 });
                 return;
@@ -1621,9 +1620,9 @@
             const tutorialSetting = localStorage.getItem('wizz_tutorial_enabled');
             if (!gameData.tutorialSeenDeath && tutorialSetting !== 'false') {
                 gameData.tutorialSeenDeath = true;
-                showCyberModal("💀 ¡HAS MUERTO O EXPIRÓ EL TIEMPO!", `El temporizador llegó a 0 o tus PV expiraron.\n\nAl morir, la nave te ha regresado automáticamente un nodo hacia atrás (nivel anterior al que moriste). Perdiste ${gameData.lastLostHype} Hype y ${gameData.lastLostExp} EXP. Puedes reparar la nave al instante gastando Hype o esperar el tiempo de recuperación.`, "⚠️");
+                showCyberModal("💀 ¡HAS MUERTO O EXPIRÓ EL TIEMPO!", `El temporizador llegó a 0 o tus PV expiraron.\n\nAl morir, la nave te ha regresado automáticamente un nodo hacia atrás. Perdiste ${gameData.lastLostHype} Hype y ${gameData.lastLostExp} EXP.`, "⚠️");
             } else {
-                showCyberModal("¡RED SOBRECARGADA!", `Derrota o tiempo agotado.\n\nPerdiste: ${gameData.lastLostHype} Hype y ${gameData.lastLostExp} EXP.\n\nSe ha retrocedido al nivel anterior al que moriste para asegurar tu recuperación.`, "💥");
+                showCyberModal("¡RED SOBRECARGADA!", `Derrota o tiempo agotado.\n\nPerdiste: ${gameData.lastLostHype} Hype y ${gameData.lastLostExp} EXP.\n\nSe ha retrocedido al nivel anterior.`, "💥");
             }
         }
 
@@ -1847,13 +1846,6 @@
                 if (dotCounterBox) dotCounterBox.classList.add('hidden');
             }
 
-            if (gameData.upgrades) {
-                const autoHypeUp = gameData.upgrades.find(u => u.id === 'auto_hype');
-                if (autoHypeUp && autoHypeUp.level > 0 && gameData.currentTower > 0) {
-                    gameData.gold += autoHypeUp.level * 2;
-                }
-            }
-
             if (gameData.currentTower === 0 && gameData.recoveryUntil) {
                 const remaining = Math.ceil((gameData.recoveryUntil - Date.now()) / 1000);
                 const recoveryBanner = document.getElementById('recovery-banner');
@@ -2070,7 +2062,7 @@
         }
 
         function renderStagesGrid() {
-            const sectorText = currentViewingTower <= 10 ? sectorNames[currentViewingTower] : `Sector ${currentViewingTower}`;
+            const sectorText = getSectorName(currentViewingTower);
             document.getElementById('world-display-title').innerText = `${sectorText}`;
             const grid = document.getElementById('stages-grid');
             grid.innerHTML = '';
@@ -2084,7 +2076,7 @@
                 if (isCurrent) btnClass = "bg-cyber-neonCyan/20 border-cyber-neonCyan text-cyber-neonCyan font-bold ring-2 ring-cyber-neonCyan/50";
                 if (isLastVisited && !isCurrent) btnClass += " border-2 border-cyber-neonYellow ring-1 ring-cyber-neonYellow";
 
-                let tooltipMessage = isUnlocked ? "Nodo disponible para incursión." : "🔒 <strong>Sector Bloqueado:</strong> Debes completar los nodos y jefes anteriores para desbloquear este acceso de red.";
+                let tooltipMessage = isUnlocked ? "Nodo disponible para incursión." : "🔒 <strong>Sector Bloqueado:</strong> Debes completar los nodos y jefes anteriores.";
 
                 grid.innerHTML += `
                     <div class="tooltip-container p-2 rounded-xl border ${btnClass} text-center text-xs transition flex flex-col justify-between" ${isUnlocked ? `onclick="selectStageToFarm(${currentViewingTower},${s})"` : ''}>
@@ -2149,7 +2141,7 @@
                 const tutorialSetting = localStorage.getItem('wizz_tutorial_enabled');
                 if (!gameData.tutorialSeenSectors && tutorialSetting !== 'false') {
                     gameData.tutorialSeenSectors = true;
-                    showCyberModal("🌐 NAVEGACIÓN DE SECTORES", "Aquí puedes ver los sectores e incursiones. Los sectores avanzados están deshabilitados al principio y se desbloquean conforme superas nodos y jefes anteriores.", "📖");
+                    showCyberModal("🌐 NAVEGACIÓN DE SECTORES", "Aquí puedes ver los sectores e incursiones.", "📖");
                 }
             }
 
@@ -2925,7 +2917,7 @@
                         uData.heroes.forEach(h => {
                             const classDef = classDefinitions[h.class] || classDefinitions['PromptEngineer'];
                             const towerNum = h.maxUnlockedTower || 1;
-                            const sectorTitle = towerNum <= 10 ? sectorNames[towerNum] : `Sector ${towerNum}`;
+                            const sectorTitle = getSectorName(towerNum);
                             rankings.push({
                                 heroName: h.name, heroClass: classDef.name, sectorTitle: sectorTitle,
                                 rebirths: h.rebirths || 0, maxTower: towerNum, maxStage: h.maxUnlockedStage || 1, level: h.level || 1
