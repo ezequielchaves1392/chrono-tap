@@ -49,9 +49,11 @@
         }
         .floating-dmg { animation: floatUpLong 1.4s ease-out forwards; pointer-events: none; font-weight: 900; font-size: 1.4rem; text-shadow: 0 0 12px rgba(0, 240, 255, 0.9); }
         .floating-skill-text { animation: floatUpLong 1.4s ease-out forwards; pointer-events: none; font-weight: 900; font-size: 1.1rem; white-space: nowrap; text-shadow: 0 0 12px rgba(0,0,0,0.9); z-index: 50; }
+        
         .tooltip-container { position: relative; }
-        .tooltip-container:hover .tooltip-box { visibility: visible; opacity: 1; pointer-events: auto; }
-        .tooltip-box { visibility: hidden; opacity: 0; transition: opacity 0.1s ease-in-out; z-index: 99999; pointer-events: none; position: absolute; }
+        .tooltip-container:hover .tooltip-box { visibility: visible; opacity: 1; }
+        .tooltip-box { visibility: hidden; opacity: 0; transition: opacity 0.15s ease-in-out; z-index: 99999; pointer-events: none; position: absolute; }
+
         #skill-tree-viewport { touch-action: none; }
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: #0f0f1a; }
@@ -82,7 +84,7 @@
                     <i class="fa-solid fa-cat text-3xl text-cyber-neonCyan animate-pulse"></i>
                 </div>
                 <h1 class="font-orbitron text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyber-neonCyan via-cyber-neonPink to-cyber-neonYellow tracking-wider">Wizzcat Clicker</h1>
-                <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-semibold font-orbitron">Cybernetic Autonomous Edition v18.6</p>
+                <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-semibold font-orbitron">Cybernetic Autonomous Edition v18.9</p>
             </div>
 
             <div id="auth-error-box" class="hidden mb-4 p-3 bg-red-950/80 border border-red-500/50 rounded-xl text-red-300 text-xs text-center font-medium animate-bounce"></div>
@@ -119,7 +121,6 @@
                 <button onclick="logout()" class="text-xs bg-cyber-bg hover:bg-cyber-border text-slate-300 px-3 py-1.5 rounded-xl border border-cyber-border font-orbitron">Salir</button>
             </div>
 
-            <!-- CHECK DE TUTORIAL EN SELECTOR DE PERSONAJES -->
             <div class="flex items-center space-x-3 mb-4 p-3 bg-cyber-bg rounded-xl border border-cyber-border">
                 <input type="checkbox" id="logged-tutorial-check" checked onchange="toggleTutorialPref(this.checked)" class="w-4 h-4 accent-cyber-neonCyan bg-cyber-bg border-cyber-border rounded cursor-pointer">
                 <label for="logged-tutorial-check" class="text-xs text-cyber-neonYellow font-orbitron cursor-pointer">Activar Tutorial Guía Inteligente en incursiones</label>
@@ -623,11 +624,14 @@
                         name: 'Monetización',
                         nodes: [
                             {id:'pm1', name:'Sponsors IA', max:5, cost:1, req:{points:0}, baseVal:12, scaling:8, desc:'Optimiza anuncios digitales generando +<val>% de <span style="color:#f3e600;">Hype</span>.', x:50, y:300, children:['pm2A','pm2B','pm2C'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'pm2A', name:'Viralidad Ads', max:5, cost:1, req:{node:'pm1', count:3}, baseVal:25, scaling:12, desc:'Campañas virales que incrementan +<val>% el <span style="color:#f3e600;">Hype</span> obtenido.', x:250, y:120, children:['pm3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'pm2A', name:'Viralidad Ads', max:5, cost:1, req:{node:'pm1', count:3}, baseVal:25, scaling:12, desc:'Campañas virales que incrementan +<val>% el <span style="color:#f3e600;">Hype</span> obtenido.', x:250, y:120, children:['pm2Active'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'pm2Active', name:'Ráfaga Patrocinada', max:5, cost:1, req:{node:'pm2A', count:2}, baseVal:30, scaling:12, desc:'Ejecuta un comando publicitario activo de <span style="color:#00f0ff;">daño directo masivo</span> y Hype extra.', x:450, y:120, children:['pm3'], type:'active', cd:8, baseDmg:25, scalingDmg:10, stat:'damage', colorType:'yellow', shape:'hexagon', color:'border-cyber-neonYellow'},
                             {id:'pm2B', name:'Cripto Minería', max:5, cost:1, req:{node:'pm1', count:3}, baseVal:20, scaling:10, desc:'Granjas secundarias de minado para +<val>% de <span style="color:#f3e600;">Hype</span>.', x:250, y:300, children:['pm3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'pm2C', name:'Suscripción VIP', max:5, cost:1, req:{node:'pm1', count:3}, baseVal:30, scaling:14, desc:'Pases exclusivos de audiencia para +<val>% de <span style="color:#f3e600;">Hype</span>.', x:250, y:480, children:['pm3'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'pm3', name:'Tokenomics', max:5, cost:1, req:{node:'pm2B', count:3}, baseVal:60, scaling:25, desc:'Economía descentralizada con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:600, y:300, children:['pm4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'pm4', name:'Imperio Ads', max:5, cost:1, req:{node:'pm3', count:3}, baseVal:250, scaling:80, desc:'Monopolio publicitario estelar con +<val>% de <span style="color:#f3e600;">Hype supremo</span>.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'pm2C', name:'Suscripción VIP', max:5, cost:1, req:{node:'pm1', count:3}, baseVal:30, scaling:14, desc:'Pases exclusivos de audiencia para +<val>% de <span style="color:#f3e600;">Hype</span>.', x:250, y:480, children:['pm3Active2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'pm3Active2', name:'Sobrecarga VIP', max:5, cost:1, req:{node:'pm2C', count:2}, baseVal:40, scaling:15, desc:'Lanza un ataque activo VIP de <span style="color:#00f0ff;">daño de alta frecuencia</span>.', x:450, y:480, children:['pm3'], type:'active', cd:10, baseDmg:35, scalingDmg:14, stat:'damage', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'pm3', name:'Tokenomics', max:5, cost:1, req:{node:'pm2B', count:3}, baseVal:60, scaling:25, desc:'Economía descentralizada con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:650, y:300, children:['pm4Active'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'pm4Active', name:'Inversión Cripto Activa', max:5, cost:1, req:{node:'pm3', count:2}, baseVal:75, scaling:30, desc:'Habilidad activa bursátil que inflige un <span style="color:#00f0ff;">impacto financiero masivo</span>.', x:850, y:300, children:['pm4'], type:'active', cd:12, baseDmg:70, scalingDmg:25, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
+                            {id:'pm4', name:'Imperio Ads', max:5, cost:1, req:{node:'pm4Active', count:3}, baseVal:250, scaling:80, desc:'Monopolio publicitario estelar con +<val>% de <span style="color:#f3e600;">Hype supremo</span>.', x:1100, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
@@ -635,9 +639,11 @@
                         nodes: [
                             {id:'cc1', name:'CPU Boost', max:5, cost:1, req:{points:0}, baseVal:8, scaling:6, desc:'Acelera los ciclos del procesador sumando +<val> de <span style="color:#ff007f;">daño físico</span>.', x:50, y:300, children:['cc2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
                             {id:'cc2', name:'Overclock GPU', max:5, cost:1, req:{node:'cc1', count:3}, baseVal:15, scaling:8, desc:'Potencia gráfica extrema otorgando +<val>% de <span style="color:#ff007f;">Daño Crítico</span>.', x:250, y:300, children:['cc3A','cc3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'cc3A', name:'Quantum Core', max:5, cost:1, req:{node:'cc2', count:3}, baseVal:40, scaling:15, desc:'Núcleo avanzado que eleva tu <span style="color:#ff007f;">daño físico directo</span>.', x:500, y:180, children:['cc4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'cc3B', name:'Hiper Hilos', max:5, cost:1, req:{node:'cc2', count:3}, baseVal:45, scaling:18, desc:'Multiprocesamiento masivo para +<val> de <span style="color:#ff007f;">daño físico</span>.', x:500, y:420, children:['cc4'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'cc4', name:'Apex Core', max:5, cost:1, req:{node:'cc3A', count:3}, baseVal:300, scaling:100, desc:'Poder computacional supremo con +<val> de <span style="color:#ff007f;">daño definitivo</span>.', x:800, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'cc3A', name:'Quantum Core', max:5, cost:1, req:{node:'cc2', count:3}, baseVal:40, scaling:15, desc:'Núcleo avanzado que eleva tu <span style="color:#ff007f;">daño físico directo</span>.', x:500, y:180, children:['ccActive1'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'ccActive1', name:'Haz de Rayo Láser', max:5, cost:1, req:{node:'cc3A', count:2}, baseVal:45, scaling:18, desc:'Dispara un haz activo concentrado de <span style="color:#00f0ff;">daño crítico instantáneo</span>.', x:700, y:180, children:['cc4'], type:'active', cd:7, baseDmg:50, scalingDmg:20, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
+                            {id:'cc3B', name:'Hiper Hilos', max:5, cost:1, req:{node:'cc2', count:3}, baseVal:45, scaling:18, desc:'Multiprocesamiento masivo para +<val> de <span style="color:#ff007f;">daño físico</span>.', x:500, y:420, children:['ccActive2'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'ccActive2', name:'Tormenta Multihilo', max:5, cost:1, req:{node:'cc3B', count:2}, baseVal:50, scaling:20, desc:'Libera hilos paralelos activos aplicando <span style="color:#00f0ff;">daño continuo en ráfaga</span>.', x:700, y:420, children:['cc4'], type:'active', cd:9, dotTicks:4, dotInterval:2, baseDmg:30, scalingDmg:12, stat:'damage', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'cc4', name:'Apex Core', max:5, cost:1, req:{node:'ccActive1', count:3}, baseVal:300, scaling:100, desc:'Poder computacional supremo con +<val> de <span style="color:#ff007f;">daño definitivo</span>.', x:950, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     }
                 ]
@@ -651,33 +657,39 @@
                         name: 'Enjambre Pasivo',
                         nodes: [
                             {id:'as1', name:'Bot Post', max:5, cost:1, req:{points:0}, baseVal:8, scaling:5, desc:'Despliega bots autónomos para infligir +<val> de <span style="color:#00f0ff;">daño en el tiempo (DOT)</span>.', x:50, y:300, children:['as2A','as2B','as2C'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'as2A', name:'Deepfake', max:5, cost:1, req:{node:'as1', count:3}, baseVal:18, scaling:9, desc:'Ilusiones sintéticas que suman +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:300, y:120, children:['as3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'as2B', name:'Skynet Local', max:5, cost:1, req:{node:'as1', count:3}, baseVal:20, scaling:10, desc:'Red neuronal autónoma para +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:300, y:300, children:['as3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'as2C', name:'Botnet Z', max:5, cost:1, req:{node:'as1', count:3}, baseVal:22, scaling:11, desc:'Infección zombie masiva con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:300, y:480, children:['as3'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'as3', name:'Hive Queen', max:5, cost:1, req:{node:'as2B', count:3}, baseVal:140, scaling:50, desc:'IA nodriza central que amplifica tu <span style="color:#00f0ff;">daño DOT</span>.', x:650, y:300, children:['as4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'as4', name:'Omega Virus', max:5, cost:1, req:{node:'as3', count:3}, baseVal:250, scaling:90, desc:'Infección sistémica con +<val> de <span style="color:#00f0ff;">daño DOT definitivo</span>.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'as2A', name:'Deepfake', max:5, cost:1, req:{node:'as1', count:3}, baseVal:18, scaling:9, desc:'Ilusiones sintéticas que suman +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:280, y:120, children:['asActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'asActive1', name:'Infección Sintética', max:5, cost:1, req:{node:'as2A', count:2}, baseVal:20, scaling:8, desc:'Activa una subrutina de enjambre con <span style="color:#00f0ff;">DOT global prolongado</span>.', x:480, y:120, children:['as3'], type:'active', cd:9, dotTicks:5, dotInterval:2, baseDmg:22, scalingDmg:9, stat:'dot', colorType:'violet', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'as2B', name:'Skynet Local', max:5, cost:1, req:{node:'as1', count:3}, baseVal:20, scaling:10, desc:'Red neuronal autónoma para +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:280, y:300, children:['as3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'as2C', name:'Botnet Z', max:5, cost:1, req:{node:'as1', count:3}, baseVal:22, scaling:11, desc:'Infección zombie masiva con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:280, y:480, children:['asActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'asActive2', name:'Enjambre Zombie Activo', max:5, cost:1, req:{node:'as2C', count:2}, baseVal:25, scaling:10, desc:'Convoca un ataque masivo activo de <span style="color:#00f0ff;">enjambre zombi corrosivo</span>.', x:480, y:480, children:['as3'], type:'active', cd:11, dotTicks:6, dotInterval:2, baseDmg:28, scalingDmg:11, stat:'dot', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'as3', name:'Hive Queen', max:5, cost:1, req:{node:'asActive1', count:3}, baseVal:140, scaling:50, desc:'IA nodriza central que amplifica tu <span style="color:#00f0ff;">daño DOT</span>.', x:720, y:300, children:['as4Active'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'as4Active', name:'Colapso de Enjambre', max:5, cost:1, req:{node:'as3', count:2}, baseVal:90, scaling:35, desc:'Ordena a la colmena un <span style="color:#00f0ff;">ataque activo masivo de ácido</span>.', x:920, y:300, children:['as4'], type:'active', cd:14, dotTicks:5, dotInterval:2, baseDmg:65, scalingDmg:25, stat:'dot', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
+                            {id:'as4', name:'Omega Virus', max:5, cost:1, req:{node:'as4Active', count:3}, baseVal:250, scaling:90, desc:'Infección sistémica con +<val> de <span style="color:#00f0ff;">daño DOT definitivo</span>.', x:1150, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Control Red',
                         nodes: [
                             {id:'ac1', name:'Cache Limpio', max:5, cost:1, req:{points:0}, baseVal:10, scaling:5, desc:'Optimiza la red para obtener +<val>% de <span style="color:#f3e600;">Hype</span>.', x:50, y:300, children:['ac2A','ac2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'ac2A', name:'Proxy Inverso', max:5, cost:1, req:{node:'ac1', count:3}, baseVal:22, scaling:10, desc:'Enrutamiento avanzado con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:300, y:180, children:['ac3A','ac3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'ac2A', name:'Proxy Inverso', max:5, cost:1, req:{node:'ac1', count:3}, baseVal:22, scaling:10, desc:'Enrutamiento avanzado con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:300, y:180, children:['ac3A','acActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'acActive1', name:'Pulso de Enrutamiento', max:5, cost:1, req:{node:'ac2A', count:2}, baseVal:30, scaling:12, desc:'Habilidad activa que desvía paquetes con <span style="color:#00f0ff;">daño de red dirigido</span>.', x:500, y:120, children:['ac4'], type:'active', cd:8, baseDmg:30, scalingDmg:12, stat:'damage', colorType:'yellow', shape:'hexagon', color:'border-cyber-neonYellow'},
                             {id:'ac2B', name:'Firewall Nube', max:5, cost:1, req:{node:'ac1', count:3}, baseVal:40, scaling:15, desc:'Seguridad en la nube para +<val>% de <span style="color:#f3e600;">Hype</span>.', x:300, y:420, children:['ac3B'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'ac3A', name:'Zero Trust A', max:5, cost:1, req:{node:'ac2A', count:3}, baseVal:70, scaling:25, desc:'Verificación estricta con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:600, y:180, children:['ac4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'ac3B', name:'Zero Trust B', max:5, cost:1, req:{node:'ac2B', count:3}, baseVal:80, scaling:28, desc:'Protocolo de confianza con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:600, y:420, children:['ac4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'ac4', name:'AI Overlord', max:5, cost:1, req:{node:'ac3A', count:3}, baseVal:200, scaling:70, desc:'Dominación absoluta con +<val>% de <span style="color:#f3e600;">Hype total</span>.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'ac3A', name:'Zero Trust A', max:5, cost:1, req:{node:'ac2A', count:3}, baseVal:70, scaling:25, desc:'Verificación estricta con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:550, y:240, children:['ac4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'ac3B', name:'Zero Trust B', max:5, cost:1, req:{node:'ac2B', count:3}, baseVal:80, scaling:28, desc:'Protocolo de confianza con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:550, y:420, children:['acActive2'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'acActive2', name:'Barrera Activa Ciber', max:5, cost:1, req:{node:'ac3B', count:2}, baseVal:40, scaling:16, desc:'Despliega un escudo activo que fulmina con <span style="color:#00f0ff;">pulso defensivo hostil</span>.', x:750, y:420, children:['ac4'], type:'active', cd:10, baseDmg:45, scalingDmg:18, stat:'damage', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'ac4', name:'AI Overlord', max:5, cost:1, req:{node:'ac3A', count:3}, baseVal:200, scaling:70, desc:'Dominación absoluta con +<val>% de <span style="color:#f3e600;">Hype total</span>.', x:950, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Automatización',
                         nodes: [
                             {id:'aa1', name:'Script Auto', max:5, cost:1, req:{points:0}, baseVal:6, scaling:4, desc:'Automatiza procesos sumando +<val> de <span style="color:#ff007f;">daño físico</span>.', x:50, y:300, children:['aa2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'aa2', name:'Daemon Activo', max:5, cost:1, req:{node:'aa1', count:3}, baseVal:15, scaling:8, desc:'Proceso en segundo plano con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:250, y:300, children:['aa3A','aa3B','aa3C'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'aa3A', name:'Cron A', max:5, cost:1, req:{node:'aa2', count:3}, baseVal:35, scaling:15, desc:'Tarea programada que aporta +<val> de <span style="color:#ff007f;">daño físico</span>.', x:500, y:150, children:['aa4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'aa3B', name:'Cron B', max:5, cost:1, req:{node:'aa2', count:3}, baseVal:40, scaling:16, desc:'Rutina de sistema con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:500, y:300, children:['aa4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'aa3C', name:'Cron C', max:5, cost:1, req:{node:'aa2', count:3}, baseVal:45, scaling:18, desc:'Sincronizador temporal con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:500, y:450, children:['aa4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'aa4', name:'Autonomous AI', max:5, cost:1, req:{node:'aa3B', count:3}, baseVal:140, scaling:50, desc:'Inteligencia autónoma con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'aa2', name:'Daemon Activo', max:5, cost:1, req:{node:'aa1', count:3}, baseVal:15, scaling:8, desc:'Proceso en segundo plano con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:250, y:300, children:['aa3A','aa3B','aaActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'aaActive1', name:'Ejecución Cron Activa', max:5, cost:1, req:{node:'aa2', count:2}, baseVal:25, scaling:10, desc:'Lanza un comando programado activo con <span style="color:#00f0ff;">daño de sistema</span>.', x:450, y:180, children:['aa4'], type:'active', cd:7, baseDmg:28, scalingDmg:11, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
+                            {id:'aa3A', name:'Cron A', max:5, cost:1, req:{node:'aa2', count:3}, baseVal:35, scaling:15, desc:'Tarea programada que aporta +<val> de <span style="color:#ff007f;">daño físico</span>.', x:500, y:300, children:['aa4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'aa3B', name:'Cron B', max:5, cost:1, req:{node:'aa2', count:3}, baseVal:40, scaling:16, desc:'Rutina de sistema con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:500, y:450, children:['aaActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'aaActive2', name:'Rutina Daemon Activa', max:5, cost:1, req:{node:'aa3B', count:2}, baseVal:35, scaling:14, desc:'Forzar proceso en bucle aplicando <span style="color:#00f0ff;">daño DOT de bucle</span>.', x:700, y:450, children:['aa4'], type:'active', cd:10, dotTicks:4, dotInterval:2, baseDmg:35, scalingDmg:14, stat:'dot', colorType:'violet', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'aa4', name:'Autonomous AI', max:5, cost:1, req:{node:'aa3A', count:3}, baseVal:140, scaling:50, desc:'Inteligencia autónoma con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     }
                 ]
@@ -691,33 +703,38 @@
                         name: 'Sinergia Híbrida',
                         nodes: [
                             {id:'qa1', name:'Qubit Base', max:5, cost:1, req:{points:0}, baseVal:6, scaling:4, desc:'Unidad cuántica básica que otorga +<val> de <span style="color:#ff007f;">daño físico</span>.', x:50, y:300, children:['qa2A','qa2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'qa2A', name:'Reactor Q', max:5, cost:1, req:{node:'qa1', count:3}, baseVal:15, scaling:7, desc:'Reactor subatómico con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:180, children:['qa3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'qa2B', name:'Pulso Q', max:5, cost:1, req:{node:'qa1', count:3}, baseVal:12, scaling:5, desc:'Habilidad activa: Libera un <span style="color:#00f0ff;">pulso de energía directo</span>.', x:300, y:420, children:['qa3A'], type:'active', cd:12, mult:1.8, stat:'damage', colorType:'cyan', effect:'active_quantum', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'qa3A', name:'Hyper Q', max:5, cost:1, req:{node:'qa2B', count:3}, baseVal:45, scaling:18, desc:'Entrelazamiento avanzado con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:550, y:180, children:['qa4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'qa3B', name:'Super Q', max:5, cost:1, req:{node:'qa2A', count:3}, baseVal:50, scaling:20, desc:'Superposición de estados con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:550, y:420, children:['qa4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'qa4', name:'Multiverso', max:5, cost:1, req:{node:'qa3A', count:3}, baseVal:180, scaling:60, desc:'Cálculo multiversal con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'qa2A', name:'Reactor Q', max:5, cost:1, req:{node:'qa1', count:3}, baseVal:15, scaling:7, desc:'Reactor subatómico con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:280, y:180, children:['qaActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'qaActive1', name:'Sobrecarga de Reactor', max:5, cost:1, req:{node:'qa2A', count:2}, baseVal:30, scaling:12, desc:'Libera un estallido activo de <span style="color:#00f0ff;">energía subatómica directa</span>.', x:480, y:180, children:['qa3B'], type:'active', cd:8, baseDmg:32, scalingDmg:13, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
+                            {id:'qa2B', name:'Pulso Q', max:5, cost:1, req:{node:'qa1', count:3}, baseVal:12, scaling:5, desc:'Mejora pasiva de resonancia cuántica.', x:280, y:420, children:['qa3A'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'qa3A', name:'Hyper Q', max:5, cost:1, req:{node:'qa2B', count:3}, baseVal:45, scaling:18, desc:'Entrelazamiento avanzado con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:550, y:420, children:['qaActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'qaActive2', name:'Entrelazamiento Activo', max:5, cost:1, req:{node:'qa3A', count:2}, baseVal:40, scaling:16, desc:'Conecta fotones cuánticos infligiendo <span style="color:#00f0ff;">daño de ráfaga estelar</span>.', x:750, y:420, children:['qa4'], type:'active', cd:10, baseDmg:48, scalingDmg:19, stat:'damage', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'qa3B', name:'Super Q', max:5, cost:1, req:{node:'qaActive1', count:3}, baseVal:50, scaling:20, desc:'Superposición de estados con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:700, y:180, children:['qa4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'qa4', name:'Multiverso', max:5, cost:1, req:{node:'qa3B', count:3}, baseVal:180, scaling:60, desc:'Cálculo multiversal con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:980, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Eficiencia Matriz',
                         nodes: [
                             {id:'qe1', name:'Compresión', max:5, cost:1, req:{points:0}, baseVal:5, scaling:2, desc:'Reduce un <val>% el costo de recursos.', x:50, y:300, children:['qe2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'qe2', name:'Algoritmo Opt', max:5, cost:1, req:{node:'qe1', count:3}, baseVal:12, scaling:4, desc:'Optimización de matriz (-<val>% de costo).', x:250, y:300, children:['qe3A','qe3B','qe3C'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'qe3A', name:'Cripto A', max:5, cost:1, req:{node:'qe2', count:3}, baseVal:25, scaling:8, desc:'Canalización de +<val>% de <span style="color:#f3e600;">Hype</span>.', x:500, y:120, children:['qe4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'qe3B', name:'Cripto B', max:5, cost:1, req:{node:'qe2', count:3}, baseVal:30, scaling:10, desc:'Canalización de +<val>% de <span style="color:#f3e600;">Hype</span>.', x:500, y:300, children:['qe4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'qe3C', name:'Cripto C', max:5, cost:1, req:{node:'qe2', count:3}, baseVal:35, scaling:12, desc:'Canalización de +<val>% de <span style="color:#f3e600;">Hype</span>.', x:500, y:480, children:['qe4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'qe4', name:'Matriz Eterna', max:5, cost:1, req:{node:'qe3B', count:3}, baseVal:120, scaling:40, desc:'Matriz cuántica con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'qe2', name:'Algoritmo Opt', max:5, cost:1, req:{node:'qe1', count:3}, baseVal:12, scaling:4, desc:'Optimización de matriz (-<val>% de costo).', x:250, y:300, children:['qe3A','qe3B','qeActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'qeActive1', name:'Optimizador Activo Q', max:5, cost:1, req:{node:'qe2', count:2}, baseVal:25, scaling:10, desc:'Ejecuta compresión activa de matriz con <span style="color:#00f0ff;">daño directo rítmico</span>.', x:450, y:180, children:['qe4'], type:'active', cd:9, baseDmg:26, scalingDmg:10, stat:'damage', colorType:'yellow', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'qe3A', name:'Cripto A', max:5, cost:1, req:{node:'qe2', count:3}, baseVal:25, scaling:8, desc:'Canalización de +<val>% de <span style="color:#f3e600;">Hype</span>.', x:500, y:300, children:['qe4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'qe3B', name:'Cripto B', max:5, cost:1, req:{node:'qe2', count:3}, baseVal:30, scaling:10, desc:'Canalización de +<val>% de <span style="color:#f3e600;">Hype</span>.', x:500, y:420, children:['qeActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'qeActive2', name:'Sintonizador Cuántico', max:5, cost:1, req:{node:'qe3B', count:2}, baseVal:35, scaling:14, desc:'Emite sintonía activa aplicando <span style="color:#00f0ff;">daño DOT cuántico</span>.', x:700, y:420, children:['qe4'], type:'active', cd:11, dotTicks:4, dotInterval:2, baseDmg:30, scalingDmg:12, stat:'dot', colorType:'violet', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'qe4', name:'Matriz Eterna', max:5, cost:1, req:{node:'qe3A', count:3}, baseVal:120, scaling:40, desc:'Matriz cuántica con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Pulso Neutrónico',
                         nodes: [
                             {id:'qp1', name:'Pulso E', max:5, cost:1, req:{points:0}, baseVal:8, scaling:5, desc:'Emisión neutrónica con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:50, y:300, children:['qp2A','qp2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'qp2A', name:'Tormenta Q', max:5, cost:1, req:{node:'qp1', count:3}, baseVal:20, scaling:8, desc:'Tormenta de energía con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:200, children:['qp3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'qp2A', name:'Tormenta Q', max:5, cost:1, req:{node:'qp1', count:3}, baseVal:20, scaling:8, desc:'Tormenta de energía con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:200, children:['qpActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'qpActive1', name:'Tormenta Neutrónica Activa', max:5, cost:1, req:{node:'qp2A', count:2}, baseVal:30, scaling:12, desc:'Desata tormenta activa con <span style="color:#00f0ff;">daño neutrónico global</span>.', x:500, y:200, children:['qp3'], type:'active', cd:8, dotTicks:5, dotInterval:2, baseDmg:25, scalingDmg:10, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
                             {id:'qp2B', name:'Plasma C', max:5, cost:1, req:{node:'qp1', count:3}, baseVal:25, scaling:10, desc:'Contención de plasma con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:400, children:['qp3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'qp3', name:'Plasma Storm', max:5, cost:1, req:{node:'qp2A', count:3}, baseVal:70, scaling:25, desc:'Tormenta iónica con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:600, y:300, children:['qp4A','qp4B'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'qp3', name:'Plasma Storm', max:5, cost:1, req:{node:'qp2B', count:3}, baseVal:70, scaling:25, desc:'Tormenta iónica con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:600, y:300, children:['qp4A','qp4Active'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'qpActive2', name:'Impacto Supernova Activo', max:5, cost:1, req:{node:'qp3', count:2}, baseVal:60, scaling:24, desc:'Lanza un destello de supernova con <span style="color:#00f0ff;">daño masivo directo</span>.', x:800, y:420, children:['qp4B'], type:'active', cd:12, baseDmg:75, scalingDmg:30, stat:'damage', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
                             {id:'qp4A', name:'Supernova A', max:5, cost:1, req:{node:'qp3', count:3}, baseVal:150, scaling:50, desc:'Explosión estelar con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:850, y:180, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'},
-                            {id:'qp4B', name:'Supernova B', max:5, cost:1, req:{node:'qp3', count:3}, baseVal:160, scaling:55, desc:'Implosión estelar con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:850, y:420, children:[], type:'passive', shape:'star', color:'border-cyber-neonPink'}
+                            {id:'qp4B', name:'Supernova B', max:5, cost:1, req:{node:'qpActive2', count:3}, baseVal:160, scaling:55, desc:'Implosión estelar con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:1050, y:350, children:[], type:'passive', shape:'star', color:'border-cyber-neonPink'}
                         ]
                     }
                 ]
@@ -731,11 +748,14 @@
                         name: 'Filo Láser',
                         nodes: [
                             {id:'cs1', name:'Katana Core', max:5, cost:1, req:{points:0}, baseVal:12, scaling:8, desc:'Filo cibernético básico que aporta +<val> de <span style="color:#ff007f;">daño físico</span>.', x:50, y:300, children:['cs2A','cs2B','cs2C'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'cs2A', name:'Monofil A', max:5, cost:1, req:{node:'cs1', count:3}, baseVal:28, scaling:12, desc:'Fibra monofilamento con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:120, children:['cs3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'cs2A', name:'Monofil A', max:5, cost:1, req:{node:'cs1', count:3}, baseVal:28, scaling:12, desc:'Fibra monofilamento con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:120, children:['csActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'csActive1', name:'Corte Monofilamento Activo', max:5, cost:1, req:{node:'cs2A', count:2}, baseVal:35, scaling:14, desc:'Ejecuta un tajo activo con <span style="color:#00f0ff;">sangrado de plasma penetrante</span>.', x:500, y:120, children:['cs3'], type:'active', cd:7, dotTicks:4, dotInterval:2, baseDmg:30, scalingDmg:12, stat:'damage', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
                             {id:'cs2B', name:'Monofil B', max:5, cost:1, req:{node:'cs1', count:3}, baseVal:30, scaling:13, desc:'Corte molecular con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:300, children:['cs3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'cs2C', name:'Monofil C', max:5, cost:1, req:{node:'cs1', count:3}, baseVal:32, scaling:14, desc:'Filo cuántico con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:480, children:['cs3'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'cs3', name:'Katana Asesina', max:5, cost:1, req:{node:'cs2B', count:3}, baseVal:110, scaling:40, desc:'Hoja letal con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:600, y:300, children:['cs4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'cs4', name:'Filo Infinito', max:5, cost:1, req:{node:'cs3', count:3}, baseVal:250, scaling:85, desc:'Katana legendaria con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'cs2C', name:'Monofil C', max:5, cost:1, req:{node:'cs1', count:3}, baseVal:32, scaling:14, desc:'Filo cuántico con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:480, children:['csActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'csActive2', name:'Estocada Cuántica Activa', max:5, cost:1, req:{node:'cs2C', count:2}, baseVal:40, scaling:16, desc:'Estocada veloz activa que inflige <span style="color:#00f0ff;">daño crítico instantáneo</span>.', x:500, y:480, children:['cs3'], type:'active', cd:9, baseDmg:45, scalingDmg:18, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
+                            {id:'cs3', name:'Katana Asesina', max:5, cost:1, req:{node:'csActive1', count:3}, baseVal:110, scaling:40, desc:'Hoja letal con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:720, y:300, children:['cs4Active'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'cs4Active', name:'Danza de Filos Activa', max:5, cost:1, req:{node:'cs3', count:2}, baseVal:80, scaling:30, desc:'Torbellino activo de katanas con <span style="color:#00f0ff;">daño masivo cortante</span>.', x:920, y:300, children:['cs4'], type:'active', cd:11, baseDmg:85, scalingDmg:32, stat:'damage', colorType:'yellow', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'cs4', name:'Filo Infinito', max:5, cost:1, req:{node:'cs4Active', count:3}, baseVal:250, scaling:85, desc:'Katana legendaria con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:1150, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
@@ -743,20 +763,24 @@
                         nodes: [
                             {id:'cr1', name:'Parry Rápido', max:5, cost:1, req:{points:0}, baseVal:4, scaling:2, desc:'Reflejos mejorados con +<val>% de <span style="color:#ff007f;">Probabilidad Crítica</span>.', x:50, y:300, children:['cr2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
                             {id:'cr2', name:'Esquina Ciega', max:5, cost:1, req:{node:'cr1', count:3}, baseVal:15, scaling:6, desc:'Golpes precisos con +<val>% de <span style="color:#ff007f;">Daño Crítico</span>.', x:250, y:300, children:['cr3A','cr3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
-                            {id:'cr3A', name:'Zen A', max:5, cost:1, req:{node:'cr2', count:3}, baseVal:40, scaling:15, desc:'Concentración total con +<val>% de <span style="color:#ff007f;">Daño Crítico</span>.', x:550, y:180, children:['cr4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'cr3B', name:'Zen B', max:5, cost:1, req:{node:'cr2', count:3}, baseVal:45, scaling:18, desc:'Estado meditativo con +<val>% de <span style="color:#ff007f;">Prob. Crítica</span>.', x:550, y:420, children:['cr4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'cr4', name:'Maestría Katana', max:5, cost:1, req:{node:'cr3A', count:3}, baseVal:150, scaling:50, desc:'Maestría absoluta con +<val>% de <span style="color:#ff007f;">Crítico final</span>.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'cr3A', name:'Zen A', max:5, cost:1, req:{node:'cr2', count:3}, baseVal:40, scaling:15, desc:'Concentración total con +<val>% de <span style="color:#ff007f;">Daño Crítico</span>.', x:550, y:180, children:['crActive1'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'crActive1', name:'Contragolpe Zen Activo', max:5, cost:1, req:{node:'cr3A', count:2}, baseVal:35, scaling:14, desc:'Postura de contraataque activo con <span style="color:#00f0ff;">daño de contraataque crítico</span>.', x:750, y:180, children:['cr4'], type:'active', cd:8, baseDmg:40, scalingDmg:16, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
+                            {id:'cr3B', name:'Zen B', max:5, cost:1, req:{node:'cr2', count:3}, baseVal:45, scaling:18, desc:'Estado meditativo con +<val>% de <span style="color:#ff007f;">Prob. Crítica</span>.', x:550, y:420, children:['crActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'crActive2', name:'Meditación Activa de Filo', max:5, cost:1, req:{node:'cr3B', count:2}, baseVal:38, scaling:15, desc:'Canaliza energía activa liberando <span style="color:#00f0ff;">impacto zen contundente</span>.', x:750, y:420, children:['cr4'], type:'active', cd:10, baseDmg:42, scalingDmg:17, stat:'damage', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'cr4', name:'Maestría Katana', max:5, cost:1, req:{node:'crActive1', count:3}, baseVal:150, scaling:50, desc:'Maestría absoluta con +<val>% de <span style="color:#ff007f;">Crítico final</span>.', x:980, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Honor',
                         nodes: [
                             {id:'ch1', name:'Bushido Digital', max:5, cost:1, req:{points:0}, baseVal:15, scaling:8, desc:'Código de honor guerrero con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:50, y:300, children:['ch2A','ch2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'ch2A', name:'Honor A', max:5, cost:1, req:{node:'ch1', count:3}, baseVal:35, scaling:15, desc:'Lealtad a la red con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:300, y:180, children:['ch3A','ch3B'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'ch2A', name:'Honor A', max:5, cost:1, req:{node:'ch1', count:3}, baseVal:35, scaling:15, desc:'Lealtad a la red con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:300, y:180, children:['ch3A','chActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'chActive1', name:'Promesa Bushido Activa', max:5, cost:1, req:{node:'ch2A', count:2}, baseVal:30, scaling:12, desc:'Ejecución activa de honor con <span style="color:#00f0ff;">daño y Hype impulsado</span>.', x:500, y:120, children:['ch4'], type:'active', cd:9, baseDmg:35, scalingDmg:14, stat:'damage', colorType:'yellow', shape:'hexagon', color:'border-cyber-neonYellow'},
                             {id:'ch2B', name:'Honor B', max:5, cost:1, req:{node:'ch1', count:3}, baseVal:40, scaling:16, desc:'Disciplina estelar con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:300, y:420, children:['ch3B'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'ch3A', name:'Shogun A', max:5, cost:1, req:{node:'ch2A', count:3}, baseVal:90, scaling:30, desc:'Rango de Shogun con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:600, y:180, children:['ch4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'ch3B', name:'Shogun B', max:5, cost:1, req:{node:'ch2B', count:3}, baseVal:100, scaling:35, desc:'Mando militar con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:600, y:420, children:['ch4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'ch4', name:'Emperador Ciber', max:5, cost:1, req:{node:'ch3A', count:3}, baseVal:240, scaling:80, desc:'Soberanía imperial con +<val>% de <span style="color:#f3e600;">Hype supremo</span>.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'ch3A', name:'Shogun A', max:5, cost:1, req:{node:'ch2A', count:3}, baseVal:90, scaling:30, desc:'Rango de Shogun con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:600, y:240, children:['ch4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'ch3B', name:'Shogun B', max:5, cost:1, req:{node:'ch2B', count:3}, baseVal:100, scaling:35, desc:'Mando militar con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:600, y:420, children:['chActive2'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'chActive2', name:'Mando Shogun Activo', max:5, cost:1, req:{node:'ch3B', count:2}, baseVal:40, scaling:16, desc:'Orden militar activa que inflige <span style="color:#00f0ff;">daño táctico de mando</span>.', x:800, y:420, children:['ch4'], type:'active', cd:11, baseDmg:45, scalingDmg:18, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
+                            {id:'ch4', name:'Emperador Ciber', max:5, cost:1, req:{node:'ch3A', count:3}, baseVal:240, scaling:80, desc:'Soberanía imperial con +<val>% de <span style="color:#f3e600;">Hype supremo</span>.', x:1000, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     }
                 ]
@@ -770,32 +794,38 @@
                         name: 'Infiltración',
                         nodes: [
                             {id:'nh1', name:'Root Exploit', max:5, cost:1, req:{points:0}, baseVal:10, scaling:6, desc:'Exploit inicial que inflige +<val> de <span style="color:#00f0ff;">daño en el tiempo (DOT)</span>.', x:50, y:300, children:['nh2'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'nh2', name:'Zero-Day', max:5, cost:1, req:{node:'nh1', count:3}, baseVal:22, scaling:10, desc:'Vulnerabilidad oculta con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:250, y:300, children:['nh3A','nh3B','nh3C'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'nh2', name:'Zero-Day', max:5, cost:1, req:{node:'nh1', count:3}, baseVal:22, scaling:10, desc:'Vulnerabilidad oculta con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:250, y:300, children:['nh3A','nh3B','nhActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'nhActive1', name:'Zero-Day Activo', max:5, cost:1, req:{node:'nh2', count:2}, baseVal:25, scaling:10, desc:'Inyecta exploit activo de <span style="color:#00f0ff;">DOT corrosivo letal</span>.', x:450, y:180, children:['nh4'], type:'active', cd:8, dotTicks:5, dotInterval:2, baseDmg:24, scalingDmg:10, stat:'dot', colorType:'violet', shape:'hexagon', color:'border-cyber-neonYellow'},
                             {id:'nh3A', name:'Payload A', max:5, cost:1, req:{node:'nh2', count:3}, baseVal:50, scaling:18, desc:'Carga maliciosa con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:550, y:120, children:['nh4'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'nh3B', name:'Payload B', max:5, cost:1, req:{node:'nh2', count:3}, baseVal:55, scaling:20, desc:'Carga destructiva con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:550, y:300, children:['nh4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'nh3B', name:'Payload B', max:5, cost:1, req:{node:'nh2', count:3}, baseVal:55, scaling:20, desc:'Carga destructiva con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:550, y:300, children:['nhActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'nhActive2', name:'Carga Útil Activa', max:5, cost:1, req:{node:'nh3B', count:2}, baseVal:35, scaling:14, desc:'Dispara payload activo con <span style="color:#00f0ff;">daño de choque directo</span>.', x:750, y:300, children:['nh4'], type:'active', cd:10, baseDmg:40, scalingDmg:16, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
                             {id:'nh3C', name:'Payload C', max:5, cost:1, req:{node:'nh2', count:3}, baseVal:60, scaling:22, desc:'Carga encriptada con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:550, y:480, children:['nh4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'nh4', name:'Omega Hack', max:5, cost:1, req:{node:'nh3B', count:3}, baseVal:220, scaling:75, desc:'Hackeo definitivo con +<val> de <span style="color:#00f0ff;">daño DOT letal</span>.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'nh4', name:'Omega Hack', max:5, cost:1, req:{node:'nhActive2', count:3}, baseVal:220, scaling:75, desc:'Hackeo definitivo con +<val> de <span style="color:#00f0ff;">daño DOT letal</span>.', x:950, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Malware',
                         nodes: [
                             {id:'nm1', name:'Trojan v1', max:5, cost:1, req:{points:0}, baseVal:12, scaling:6, desc:'Troyano sigiloso que aporta +<val>% de <span style="color:#f3e600;">Hype</span>.', x:50, y:300, children:['nm2A','nm2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'nm2A', name:'Worm A', max:5, cost:1, req:{node:'nm1', count:3}, baseVal:28, scaling:12, desc:'Gusano de red con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:300, y:180, children:['nm3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'nm2A', name:'Worm A', max:5, cost:1, req:{node:'nm1', count:3}, baseVal:28, scaling:12, desc:'Gusano de red con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:300, y:180, children:['nmActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'nmActive1', name:'Infección Gusano Activa', max:5, cost:1, req:{node:'nm2A', count:2}, baseVal:30, scaling:12, desc:'Propaga troyano activo con <span style="color:#00f0ff;">daño viral expansivo</span>.', x:500, y:180, children:['nm3'], type:'active', cd:9, dotTicks:4, dotInterval:2, baseDmg:28, scalingDmg:11, stat:'dot', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
                             {id:'nm2B', name:'Worm B', max:5, cost:1, req:{node:'nm1', count:3}, baseVal:32, scaling:14, desc:'Gusano replicante con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:300, y:420, children:['nm3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'nm3', name:'Botnet Global', max:5, cost:1, req:{node:'nm2A', count:3}, baseVal:70, scaling:25, desc:'Red zombie global con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:600, y:300, children:['nm4A','nm4B'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'nm3', name:'Botnet Global', max:5, cost:1, req:{node:'nm2A', count:3}, baseVal:70, scaling:25, desc:'Red zombie global con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:600, y:300, children:['nm4A','nmActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'nmActive2', name:'Comando Botnet Activo', max:5, cost:1, req:{node:'nm3', count:2}, baseVal:45, scaling:18, desc:'Ordena botnet activa con <span style="color:#00f0ff;">daño masivo de red</span>.', x:800, y:420, children:['nm4B'], type:'active', cd:11, baseDmg:55, scalingDmg:22, stat:'damage', colorType:'yellow', shape:'hexagon', color:'border-cyber-neonYellow'},
                             {id:'nm4A', name:'Matrix A', max:5, cost:1, req:{node:'nm3', count:3}, baseVal:180, scaling:60, desc:'Control de matriz con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:850, y:180, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'},
-                            {id:'nm4B', name:'Matrix B', max:5, cost:1, req:{node:'nm3', count:3}, baseVal:190, scaling:65, desc:'Dominio de matriz con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:850, y:420, children:[], type:'passive', shape:'star', color:'border-cyber-neonPink'}
+                            {id:'nm4B', name:'Matrix B', max:5, cost:1, req:{node:'nmActive2', count:3}, baseVal:190, scaling:65, desc:'Dominio de matriz con +<val>% de <span style="color:#f3e600;">Hype</span>.', x:1050, y:350, children:[], type:'passive', shape:'star', color:'border-cyber-neonPink'}
                         ]
                     },
                     {
                         name: 'Firewall Bypass',
                         nodes: [
                             {id:'fb1', name:'Zero Trace', max:5, cost:1, req:{points:0}, baseVal:2, scaling:1, desc:'Ocultación que reduce -<val>% el CD de habilidades.', x:50, y:300, children:['fb2A','fb2B'], type:'passive', shape:'circle', color:'border-cyber-neonCyan'},
-                            {id:'fb2A', name:'Ghost Protocol', max:5, cost:1, req:{node:'fb1', count:3}, baseVal:5, scaling:2, desc:'Protocolo fantasma (-<val>% de CD).', x:300, y:200, children:['fb3'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'fb2A', name:'Ghost Protocol', max:5, cost:1, req:{node:'fb1', count:3}, baseVal:5, scaling:2, desc:'Protocolo fantasma (-<val>% de CD).', x:300, y:200, children:['fbActive1'], type:'passive', shape:'square', color:'border-cyber-neonPink'},
+                            {id:'fbActive1', name:'Infiltración Fantasma Activa', max:5, cost:1, req:{node:'fb2A', count:2}, baseVal:30, scaling:12, desc:'Salto fantasma activo con <span style="color:#00f0ff;">daño de infiltración rápida</span>.', x:500, y:200, children:['fb3'], type:'active', cd:7, baseDmg:33, scalingDmg:13, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
                             {id:'fb2B', name:'Shadow Ping', max:5, cost:1, req:{node:'fb1', count:3}, baseVal:6, scaling:2, desc:'Pings en la sombra (-<val>% de CD).', x:300, y:400, children:['fb3'], type:'passive', shape:'hexagon', color:'border-cyber-neonYellow'},
-                            {id:'fb3', name:'Phantom Node', max:5, cost:1, req:{node:'fb2A', count:3}, baseVal:12, scaling:4, desc:'Nodo fantasma (-<val>% de CD).', x:600, y:300, children:['fb4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'fb4', name:'Invisible Web', max:5, cost:1, req:{node:'fb3', count:3}, baseVal:25, scaling:5, desc:'Red invisible con -<val>% de CD máx.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'fb3', name:'Phantom Node', max:5, cost:1, req:{node:'fbActive1', count:3}, baseVal:12, scaling:4, desc:'Nodo fantasma (-<val>% de CD).', x:600, y:300, children:['fbActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'fbActive2', name:'Anulación Activa de Red', max:5, cost:1, req:{node:'fb3', count:2}, baseVal:40, scaling:16, desc:'Anula cortafuegos aplicando <span style="color:#00f0ff;">daño DOT en sombra</span>.', x:800, y:300, children:['fb4'], type:'active', cd:10, dotTicks:5, dotInterval:2, baseDmg:30, scalingDmg:12, stat:'dot', colorType:'violet', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'fb4', name:'Invisible Web', max:5, cost:1, req:{node:'fbActive2', count:3}, baseVal:25, scaling:5, desc:'Red invisible con -<val>% de CD máx.', x:1000, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     }
                 ]
@@ -809,32 +839,39 @@
                         name: 'Energía Oscura',
                         nodes: [
                             {id:'vw1', name:'Void Spark', max:5, cost:1, req:{points:0}, baseVal:14, scaling:8, desc:'Chispa del vacío que aporta +<val> de <span style="color:#ff007f;">daño físico estelar</span>.', x:50, y:300, children:['vw2A','vw2B','vw2C'], type:'passive', shape:'circle', color:'border-cyber-neonPurple'},
-                            {id:'vw2A', name:'Dark A', max:5, cost:1, req:{node:'vw1', count:3}, baseVal:30, scaling:14, desc:'Energía oscura condensada con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:120, children:['vw3'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'vw2A', name:'Dark A', max:5, cost:1, req:{node:'vw1', count:3}, baseVal:30, scaling:14, desc:'Energía oscura condensada con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:120, children:['vwActive1'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'vwActive1', name:'Ráfaga de Antimateria', max:5, cost:1, req:{node:'vw2A', count:2}, baseVal:40, scaling:16, desc:'Libera ráfaga activa con <span style="color:#00f0ff;">daño de antimateria directo</span>.', x:500, y:120, children:['vw3'], type:'active', cd:8, baseDmg:45, scalingDmg:18, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
                             {id:'vw2B', name:'Dark B', max:5, cost:1, req:{node:'vw1', count:3}, baseVal:32, scaling:15, desc:'Materia oscura con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:300, children:['vw3'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'vw2C', name:'Dark C', max:5, cost:1, req:{node:'vw1', count:3}, baseVal:35, scaling:16, desc:'Antimateria con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:480, children:['vw3'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'vw3', name:'Event Horizon', max:5, cost:1, req:{node:'vw2B', count:3}, baseVal:120, scaling:45, desc:'Horizonte de sucesos con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:600, y:300, children:['vw4'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'vw4', name:'Black Hole', max:5, cost:1, req:{node:'vw3', count:3}, baseVal:280, scaling:95, desc:'Agujero negro con +<val> de <span style="color:#ff007f;">daño físico estelar</span>.', x:900, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'vw2C', name:'Dark C', max:5, cost:1, req:{node:'vw1', count:3}, baseVal:35, scaling:16, desc:'Antimateria con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:300, y:480, children:['vwActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'vwActive2', name:'Imlosión Oscura Activa', max:5, cost:1, req:{node:'vw2C', count:2}, baseVal:42, scaling:17, desc:'Implosiona materia activa con <span style="color:#00f0ff;">daño estelar de vacío</span>.', x:500, y:480, children:['vw3'], type:'active', cd:10, baseDmg:50, scalingDmg:20, stat:'damage', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'vw3', name:'Event Horizon', max:5, cost:1, req:{node:'vwActive1', count:3}, baseVal:120, scaling:45, desc:'Horizonte de sucesos con +<val> de <span style="color:#ff007f;">daño físico</span>.', x:720, y:300, children:['vw4Active'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'vw4Active', name:'Colapso de Horizonte Activo', max:5, cost:1, req:{node:'vw3', count:2}, baseVal:90, scaling:35, desc:'Colapsa el horizonte aplicando <span style="color:#00f0ff;">daño DOT de singularidad</span>.', x:920, y:300, children:['vw4'], type:'active', cd:12, dotTicks:5, dotInterval:2, baseDmg:60, scalingDmg:24, stat:'dot', colorType:'violet', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'vw4', name:'Black Hole', max:5, cost:1, req:{node:'vw4Active', count:3}, baseVal:280, scaling:95, desc:'Agujero negro con +<val> de <span style="color:#ff007f;">daño físico estelar</span>.', x:1150, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Anomalía',
                         nodes: [
                             {id:'va1', name:'Gravity Well', max:5, cost:1, req:{points:0}, baseVal:15, scaling:7, desc:'Pozo gravitacional que inflige +<val> de <span style="color:#00f0ff;">daño en el tiempo (DOT)</span>.', x:50, y:300, children:['va2'], type:'passive', shape:'circle', color:'border-cyber-neonPurple'},
-                            {id:'va2', name:'Spatial Rift', max:5, cost:1, req:{node:'va1', count:3}, baseVal:35, scaling:15, desc:'Brecha espacial con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:250, y:300, children:['va3A','va3B'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
-                            {id:'va3A', name:'Warp A', max:5, cost:1, req:{node:'va2', count:3}, baseVal:80, scaling:28, desc:'Distorsión dimensional con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:550, y:180, children:['va4'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'va3B', name:'Warp B', max:5, cost:1, req:{node:'va2', count:3}, baseVal:90, scaling:32, desc:'Deformación cósmica con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:550, y:420, children:['va4'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
-                            {id:'va4', name:'Cosmic Collapse', max:5, cost:1, req:{node:'va3A', count:3}, baseVal:240, scaling:85, desc:'Colapso cósmico con +<val> de <span style="color:#00f0ff;">daño DOT cósmico</span>.', x:850, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
+                            {id:'va2', name:'Spatial Rift', max:5, cost:1, req:{node:'va1', count:3}, baseVal:35, scaling:15, desc:'Brecha espacial con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:250, y:300, children:['va3A','va3B','vaActive1'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'vaActive1', name:'Brecha Activa Espacial', max:5, cost:1, req:{node:'va2', count:2}, baseVal:35, scaling:14, desc:'Abre brecha activa con <span style="color:#00f0ff;">daño DOT gravitacional</span>.', x:450, y:180, children:['va4'], type:'active', cd:8, dotTicks:5, dotInterval:2, baseDmg:32, scalingDmg:13, stat:'dot', colorType:'violet', shape:'hexagon', color:'border-cyber-neonYellow'},
+                            {id:'va3A', name:'Warp A', max:5, cost:1, req:{node:'va2', count:3}, baseVal:80, scaling:28, desc:'Distorsión dimensional con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:550, y:120, children:['va4'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
+                            {id:'va3B', name:'Warp B', max:5, cost:1, req:{node:'va2', count:3}, baseVal:90, scaling:32, desc:'Deformación cósmica con +<val> de <span style="color:#00f0ff;">daño DOT</span>.', x:550, y:420, children:['vaActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'vaActive2', name:'Deformación Activa Cósmica', max:5, cost:1, req:{node:'va3B', count:2}, baseVal:45, scaling:18, desc:'Libera distorsión activa con <span style="color:#00f0ff;">daño de choque directo</span>.', x:750, y:420, children:['va4'], type:'active', cd:11, baseDmg:55, scalingDmg:22, stat:'damage', colorType:'cyan', shape:'hexagon', color:'border-cyber-neonCyan'},
+                            {id:'va4', name:'Cosmic Collapse', max:5, cost:1, req:{node:'vaActive1', count:3}, baseVal:240, scaling:85, desc:'Colapso cósmico con +<val> de <span style="color:#00f0ff;">daño DOT cósmico</span>.', x:950, y:300, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'}
                         ]
                     },
                     {
                         name: 'Singularidad',
                         nodes: [
                             {id:'vs1', name:'Horizonte', max:5, cost:1, req:{points:0}, baseVal:20, scaling:10, desc:'Campo de dilatación con +<val>% de <span style="color:#00f0ff;">EXP</span>.', x:50, y:300, children:['vs2A','vs2B'], type:'passive', shape:'circle', color:'border-cyber-neonPurple'},
-                            {id:'vs2A', name:'Loop A', max:5, cost:1, req:{node:'vs1', count:3}, baseVal:45, scaling:20, desc:'Bucle temporal con +<val>% de <span style="color:#00f0ff;">EXP</span>.', x:300, y:180, children:['vs3'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'vs2A', name:'Loop A', max:5, cost:1, req:{node:'vs1', count:3}, baseVal:45, scaling:20, desc:'Bucle temporal con +<val>% de <span style="color:#00f0ff;">EXP</span>.', x:300, y:180, children:['vsActive1'], type:'passive', shape:'square', color:'border-cyber-neonCyan'},
+                            {id:'vsActive1', name:'Bucle Temporal Activo', max:5, cost:1, req:{node:'vs2A', count:2}, baseVal:30, scaling:12, desc:'Abre bucle activo aplicando <span style="color:#00f0ff;">daño temporal repetitivo</span>.', x:500, y:180, children:['vs3'], type:'active', cd:9, baseDmg:38, scalingDmg:15, stat:'damage', colorType:'yellow', shape:'hexagon', color:'border-cyber-neonYellow'},
                             {id:'vs2B', name:'Loop B', max:5, cost:1, req:{node:'vs1', count:3}, baseVal:50, scaling:22, desc:'Bucle cuántico con +<val>% de <span style="color:#00f0ff;">EXP</span>.', x:300, y:420, children:['vs3'], type:'passive', shape:'hexagon', color:'border-cyber-neonPink'},
-                            {id:'vs3', name:'Nebula Surge', max:5, cost:1, req:{node:'vs2A', count:3}, baseVal:120, scaling:45, desc:'Oleada estelar con +<val>% de <span style="color:#00f0ff;">EXP</span>.', x:600, y:300, children:['vs4A','vs4B'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'vs3', name:'Nebula Surge', max:5, cost:1, req:{node:'vsActive1', count:3}, baseVal:120, scaling:45, desc:'Oleada estelar con +<val>% de <span style="color:#00f0ff;">EXP</span>.', x:600, y:300, children:['vs4A','vsActive2'], type:'passive', shape:'diamond', color:'border-cyber-neonPurple'},
+                            {id:'vsActive2', name:'Oleada Activa de Nebulosa', max:5, cost:1, req:{node:'vs3', count:2}, baseVal:50, scaling:20, desc:'Desata oleada activa con <span style="color:#00f0ff;">daño masivo de nebulosa</span>.', x:800, y:420, children:['vs4B'], type:'active', cd:12, baseDmg:65, scalingDmg:26, stat:'damage', colorType:'pink', shape:'hexagon', color:'border-cyber-neonPink'},
                             {id:'vs4A', name:'Ascend A', max:5, cost:1, req:{node:'vs3', count:3}, baseVal:250, scaling:80, desc:'Ascensión cósmica con +<val>% de <span style="color:#00f0ff;">EXP</span>.', x:850, y:180, children:[], type:'passive', shape:'star', color:'border-cyber-neonYellow'},
-                            {id:'vs4B', name:'Ascend B', max:5, cost:1, req:{node:'vs3', count:3}, baseVal:260, scaling:85, desc:'Trascendencia estelar con +<val>% de <span style="color:#00f0ff;">EXP</span>.', x:850, y:420, children:[], type:'passive', shape:'star', color:'border-cyber-neonPink'}
+                            {id:'vs4B', name:'Ascend B', max:5, cost:1, req:{node:'vsActive2', count:3}, baseVal:260, scaling:85, desc:'Trascendencia estelar con +<val>% de <span style="color:#00f0ff;">EXP</span>.', x:1050, y:350, children:[], type:'passive', shape:'star', color:'border-cyber-neonPink'}
                         ]
                     }
                 ]
@@ -891,7 +928,6 @@
             { id: 'ach3', name: 'Singularidad', desc: 'Realiza tu primera Singularidad.', target: 1, progress: 0, rewardCrystals: 15, claimed: false },
             { id: 'ach4', name: 'Cazador de Bugs', desc: 'Derrota 5 Jefes de Nodo 10.', target: 5, progress: 0, rewardCrystals: 10, claimed: false },
             { id: 'ach5', name: 'Conquistador de Red', desc: 'Alcanza el Sector 3.', target: 3, progress: 1, rewardCrystals: 8, claimed: false },
-            { id: 'ach6', name: 'Tecleador Veloz', desc: 'Ejecuta 250 prompts.', target: 250, progress: 0, rewardCrystals: 6, claimed: false },
             { id: 'ach7', name: 'Magnate del Hype', desc: 'Acumula 2,500 Hype.', target: 2500, progress: 0, rewardCrystals: 7, claimed: false },
             { id: 'ach8', name: 'Inteligencia Suprema', desc: 'Alcanza Nivel 25.', target: 25, progress: 1, rewardCrystals: 12, claimed: false },
             { id: 'ach9', name: 'Coleccionista de Shards', desc: 'Consigue 15 Shards.', target: 15, progress: 0, rewardCrystals: 20, claimed: false }
@@ -918,11 +954,9 @@
             }
         });
 
-        // BLOQUEO EXCLUSIVO DE ESPACIO, ENTER Y ESCAPE SOLO EN BOTONES/ELEMENTOS INTERACTIVOS (PERMITE ESCRIBIR EN INPUTS)
         window.addEventListener('keydown', (e) => {
             const isInputTarget = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable);
             
-            // HABILITADOR DE TECLAS 1, 2, 3, 4, 5 PARA TIRAR ATAQUES ACTIVOS
             if (!isInputTarget && ['1', '2', '3', '4', '5'].includes(e.key)) {
                 const slotIndex = parseInt(e.key) - 1;
                 useEquippedSkill(slotIndex);
@@ -1315,6 +1349,7 @@
                 sectorsTabBtn.removeAttribute('disabled');
                 sectorsTabBtn.className = "nav-btn flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-white transition relative";
             }
+            renderActionBar();
         }
 
         function renderNaveStats() {
@@ -1457,7 +1492,7 @@
                 minigameBox.classList.add('hidden');
             }
 
-            const sectorText = sectorNames[Math.min(gameData.currentTower, sectorNames.length - 1)];
+            const sectorText = gameData.currentTower <= 10 ? sectorNames[gameData.currentTower] : `Sector ${gameData.currentTower}`;
             document.getElementById('stage-badge').innerText = isNave ? `Nave de ${gameData.name}` : `${sectorText} • ${isBoss ? '🔥 JEFE' : 'Nodo ' + gameData.currentStage + '/10'}`;
             document.getElementById('enemy-name').innerText = isNave ? `Nave Orbital Central` : (isBoss ? `Firewall Central` : `Subrutina Hostil`);
             document.getElementById('enemy-lore').innerText = isNave ? "Centro de control orbital." : "Subrutina hostil bloqueando red.";
@@ -1878,7 +1913,6 @@
             damageEnemy(finalTapDmg, isCrit, false);
             showFloatingDmg(event, (isCrit ? '💥 CRIT! +' : '+') + finalTapDmg, isCrit);
             checkAchievementProgress('ach1', 1);
-            checkAchievementProgress('ach6', 1);
         }
 
         function damageEnemy(amount, isCrit = false, isDot = false) {
@@ -2036,7 +2070,7 @@
         }
 
         function renderStagesGrid() {
-            const sectorText = sectorNames[Math.min(currentViewingTower, sectorNames.length - 1)];
+            const sectorText = currentViewingTower <= 10 ? sectorNames[currentViewingTower] : `Sector ${currentViewingTower}`;
             document.getElementById('world-display-title').innerText = `${sectorText}`;
             const grid = document.getElementById('stages-grid');
             grid.innerHTML = '';
@@ -2214,13 +2248,9 @@
                 if (omega) globalDmgMulti += (omega.level * 0.5);
             }
 
-            let typeBadge = '<span style="color:#00f0ff; font-weight:bold;">[ATAQUE DIRECTO]</span>';
-            if (node.dotTicks) {
-                typeBadge = '<span style="color:#9d00ff; font-weight:bold;">[DAÑO GLOBAL EN EL TIEMPO (DOT)]</span>';
-            } else if (node.type === 'passive' && node.desc.includes('Hype')) {
-                typeBadge = '<span style="color:#f3e600; font-weight:bold;">[BUFF DE HYPE]</span>';
-            } else if (node.type === 'passive' && (node.desc.includes('Crit') || node.desc.includes('Prob'))) {
-                typeBadge = '<span style="color:#ff007f; font-weight:bold;">[BUFF DE CRÍTICO]</span>';
+            let typeBadge = '<span style="color:#00f0ff; font-weight:bold;">[🛡️ HABILIDAD PASIVA]</span>';
+            if (node.type === 'active') {
+                typeBadge = '<span style="color:#f3e600; font-weight:bold;">[⚡ HABILIDAD ACTIVA]</span>';
             }
 
             let textDesc = node.desc;
@@ -2894,11 +2924,11 @@
                     if (uData.heroes && Array.isArray(uData.heroes)) {
                         uData.heroes.forEach(h => {
                             const classDef = classDefinitions[h.class] || classDefinitions['PromptEngineer'];
-                            const sectorIdx = Math.min(h.maxUnlockedTower || 1, sectorNames.length - 1);
-                            const sectorTitle = sectorNames[sectorIdx];
+                            const towerNum = h.maxUnlockedTower || 1;
+                            const sectorTitle = towerNum <= 10 ? sectorNames[towerNum] : `Sector ${towerNum}`;
                             rankings.push({
                                 heroName: h.name, heroClass: classDef.name, sectorTitle: sectorTitle,
-                                rebirths: h.rebirths || 0, maxTower: h.maxUnlockedTower || 1, maxStage: h.maxUnlockedStage || 1, level: h.level || 1
+                                rebirths: h.rebirths || 0, maxTower: towerNum, maxStage: h.maxUnlockedStage || 1, level: h.level || 1
                             });
                         });
                     }
@@ -2918,7 +2948,7 @@
                                 <div>
                                     <div class="font-semibold text-slate-200 font-orbitron text-xs">${r.heroName}</div>
                                     <div class="text-[10px] text-slate-400 font-orbitron">${r.heroClass} • Nv.${r.level} • ⚛️${r.rebirths}</div>
-                                </div>
+                                    </div>
                             </div>
                             <div class="text-right font-orbitron">
                                 <div class="text-cyber-neonCyan font-bold text-xs">${r.sectorTitle}</div>
