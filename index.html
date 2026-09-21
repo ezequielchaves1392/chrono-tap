@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronos Tap: Heroes of the Rift - Ultimate Edition v4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; user-select: none; -webkit-user-select: none; background-color: #030712; color: #f3f4f6; }
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .game-gradient { background: radial-gradient(circle at center, #1e1b4b 0%, #030712 100%); }
+        .click-pulse { animation: pulseClick 0.08s ease-in-out; }
+        @keyframes pulseClick {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(0.92); filter: brightness(1.4); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(-70px) scale(1.3) rotate(5deg); }
+        }
+        .floating-dmg { animation: floatUp 0.6s ease-out forwards; pointer-events: none; text-shadow: 0 0 8px rgba(234, 179, 8, 0.6); }
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-4px, 2px); }
+            40% { transform: translate(4px, -2px); }
+            60% { transform: translate(-2px, -2px); }
+            80% { transform: translate(2px, 2px); }
+        }
+        .screen-shake { animation: shake 0.25s ease-in-out; }
+        @keyframes qteGlow {
+            0%, 100% { box-shadow: 0 0 10px #ef4444; transform: scale(1); }
+            50% { box-shadow: 0 0 25px #ef4444, 0 0 40px #f59e0b; transform: scale(1.06); }
+        }
+        .qte-target { animation: qteGlow 0.6s infinite alternate; }
+        .tooltip-container:hover .tooltip-box { visibility: visible; opacity: 1; }
+        .tooltip-box { visibility: hidden; opacity: 0; transition: opacity 0.2s ease-in-out; z-index: 9999; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-database-compat.js"></script>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden game-gradient">
+
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div class="max-w-md w-full bg-slate-900 border border-amber-500/40 rounded-2xl p-6 shadow-[0_0_50px_rgba(234,179,8,0.15)] relative">
+            <div class="text-center mb-6">
+                <div class="inline-block p-3 rounded-full bg-amber-500/10 border border-amber-500/30 mb-2 shadow-inner">
+                    <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+                <h1 class="font-cinzel text-3xl font-extrabold text-amber-400 tracking-wider">Chronos Tap</h1>
+                <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest font-semibold">Heroes of the Rift • Ultimate v4</p>
+            </div>
+
+            <div id="auth-error-box" class="hidden mb-4 p-3 bg-red-950/80 border border-red-500/50 rounded-xl text-red-300 text-xs text-center font-medium animate-bounce"></div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Nombre de Usuario</label>
+                    <input type="text" id="auth-username" placeholder="Ej: EseGamer" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-500 rounded-xl px-4 py-3 text-sm text-slate-100 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Contraseña</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-500 rounded-xl px-4 py-3 text-sm text-slate-100 outline-none transition">
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button onclick="handleLogin()" class="w-full py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg transition active:scale-95">Iniciar Sesión</button>
+                    <button onclick="handleRegister()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 font-bold rounded-xl text-sm transition active:scale-95">Crear Cuenta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO SELECTION SCREEN -->
+    <div id="hero-select-screen" class="fixed inset-0 z-40 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="max-w-2xl w-full bg-slate-900 border border-amber-500/40 rounded-2xl p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="font-cinzel text-2xl font-bold text-amber-400">Selecciona tu Héroe</h2>
+                    <p class="text-xs text-slate-400">Gestiona hasta 3 héroes independientes por cuenta</p>
+                </div>
+                <button onclick="logout()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700">Cerrar Sesión</button>
+            </div>
+
+            <div id="hero-slots-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
+
+            <div id="create-hero-section" class="border-t border-slate-800 pt-5">
+                <h3 class="text-sm font-semibold text-amber-300 mb-3 uppercase tracking-wider">Reclutar Nuevo Héroe</h3>
+                <div id="hero-create-error" class="hidden mb-2 text-xs text-red-400 font-semibold"></div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Nombre del Héroe</label>
+                        <input type="text" id="new-hero-name" placeholder="Ej: Chronomancer" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-500 rounded-xl px-3 py-2 text-sm text-slate-100 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Clase de Combate</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="selectClass('Guerrero')" id="class-btn-Guerrero" class="class-btn p-2 rounded-xl border border-amber-500/60 bg-amber-500/20 text-amber-300 text-xs font-bold transition">Guerrero</button>
+                            <button type="button" onclick="selectClass('Mago')" id="class-btn-Mago" class="class-btn p-2 rounded-xl border border-slate-700 bg-slate-950 text-slate-400 text-xs font-bold transition">Mago</button>
+                            <button type="button" onclick="selectClass('Arquero')" id="class-btn-Arquero" class="class-btn p-2 rounded-xl border border-slate-700 bg-slate-950 text-slate-400 text-xs font-bold transition">Arquero</button>
+                        </div>
+                    </div>
+                    <button onclick="createNewHero()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm shadow-lg transition">Crear y Entrar al Rift</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GAME INTERFACE -->
+    <div id="game-screen" class="flex-1 flex flex-col justify-between max-w-lg mx-auto w-full p-3 sm:p-4 hidden">
+        
+        <!-- HEADER STATS -->
+        <header class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-lg flex items-center justify-between mb-3 relative">
+            <div class="flex items-center space-x-3">
+                <div id="header-avatar-bg" class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center font-cinzel font-bold text-amber-400 text-lg shadow-inner">
+                    ⚔️
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span id="header-username" class="font-cinzel font-bold text-amber-400 text-sm sm:text-base">ESE</span>
+                        <span id="header-class" class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">GUERRERO</span>
+                    </div>
+                    <div class="flex items-center space-x-2 mt-1 text-xs text-slate-300">
+                        <span class="font-bold text-amber-200">Nv. <span id="header-level">1</span></span>
+                        <span class="text-slate-500">|</span>
+                        <span class="text-slate-400">EXP: <span id="header-exp">0</span>/<span id="header-max-exp">100</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col items-end space-y-1">
+                <button onclick="openHeroSelector()" class="text-[11px] text-slate-400 hover:text-amber-400 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700 transition">Héroes</button>
+                <div class="flex items-center space-x-3 text-xs font-semibold">
+                    <span class="text-emerald-400"><span id="header-gold">50</span> Oro</span>
+                    <span class="text-cyan-400"><span id="header-crystals">0</span> 💎</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- BENEFIT NOTIFICATION TOAST -->
+        <div id="benefit-toast" class="hidden mb-2 p-2 bg-gradient-to-r from-cyan-950 to-indigo-950 border border-cyan-500/50 rounded-xl text-center text-xs font-bold text-cyan-300 shadow-lg animate-pulse">
+            ✨ <span id="benefit-toast-text">¡Beneficio Activo obtenido!</span>
+        </div>
+
+        <!-- MAIN VIEWPORT TABS -->
+        <main class="flex-1 flex flex-col justify-center relative my-1">
+
+            <!-- TAB 1: BATALLA -->
+            <div id="tab-content-Batalla" class="tab-pane flex flex-col items-center space-y-3">
+                <div id="enemy-card-container" class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center space-x-2">
+                            <span id="stage-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">TORRE 1 • STAGE 1/10</span>
+                            <h3 id="enemy-name" class="font-cinzel font-bold text-amber-400 text-xs sm:text-sm truncate max-w-[160px] sm:max-w-[210px]">Guardián del Tiempo</h3>
+                        </div>
+                        <div class="text-xs font-mono font-bold text-amber-300 flex items-center space-x-1">
+                            <span>⏳</span> <span id="enemy-timer">15s</span>
+                        </div>
+                    </div>
+
+                    <div id="boss-shield-box" class="hidden mb-2 p-1.5 bg-blue-950/80 border border-blue-500/50 rounded-xl text-center text-xs font-bold text-blue-300 animate-pulse">
+                        🛡️ ¡ESCUDO DE JEFE ACTIVO! ¡Completa la secuencia numérica para romperlo!
+                    </div>
+
+                    <div class="w-full bg-slate-950 h-4 rounded-full overflow-hidden p-0.5 border border-slate-800 relative shadow-inner mb-2">
+                        <div id="enemy-hp-bar" class="bg-gradient-to-r from-red-600 to-amber-500 h-full rounded-full transition-all duration-150" style="width: 100%;"></div>
+                        <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-slate-950 drop-shadow">
+                            <span id="enemy-hp-text">100 / 100</span>
+                        </div>
+                    </div>
+                    <p id="enemy-lore" class="text-[11px] text-slate-400 italic text-center">Una manifestación menor del flujo temporal corrompido.</p>
+                </div>
+
+                <div class="relative py-3 flex items-center justify-center">
+                    <div id="qte-circles-layer" class="absolute inset-0 pointer-events-none flex items-center justify-center z-20"></div>
+
+                    <button id="tap-target-btn" onclick="handleTap(event)" class="w-40 h-40 sm:w-44 sm:h-44 rounded-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 border-4 border-amber-500/60 shadow-[0_0_35px_rgba(234,179,8,0.25)] flex items-center justify-center active:scale-95 transition cursor-pointer relative group">
+                        <div class="absolute inset-2 rounded-full border border-amber-500/20 group-hover:border-amber-500/50 transition"></div>
+                        <div class="text-center">
+                            <span id="tap-icon" class="text-5xl sm:text-6xl drop-shadow-lg block mb-1">⚔️</span>
+                            <span class="text-[10px] uppercase font-bold text-amber-400/90 tracking-widest block">Atacar</span>
+                        </div>
+                    </button>
+                    <div id="floating-text-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+                </div>
+
+                <div class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex justify-between items-center text-xs">
+                    <div class="text-slate-300">Daño/Toque: <strong id="stat-damage" class="text-amber-400 font-mono">12</strong></div>
+                    <div class="w-px h-4 bg-slate-800"></div>
+                    <div class="text-slate-300">DPS: <strong id="stat-damage-dps" class="text-amber-400 font-mono">0</strong></div>
+                </div>
+            </div>
+
+            <!-- TAB 2: TORRE -->
+            <div id="tab-content-Torre" class="tab-pane hidden flex flex-col space-y-3 overflow-y-auto max-h-[350px] pr-1">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
+                    <h3 class="font-cinzel text-lg font-bold text-amber-400 mb-1">Selección de Torres y Stages</h3>
+                    <p class="text-xs text-slate-400 mb-3">Vuelve a torres anteriores para farmear oro o avanza hacia la cúspide.</p>
+                    
+                    <div class="flex items-center justify-center space-x-2 mb-4">
+                        <button onclick="changeTowerWorld(-1)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-slate-700 text-xs font-bold">◀ Torre Ant.</button>
+                        <span id="world-display-title" class="font-cinzel font-bold text-amber-300 text-sm">Torre 1</span>
+                        <button onclick="changeTowerWorld(1)" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-lg border border-slate-700 text-xs font-bold">Torre Sig. ▶</button>
+                    </div>
+
+                    <div id="stages-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4"></div>
+
+                    <button onclick="fastForwardCurrentStage()" class="w-full py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold rounded-xl text-xs shadow-lg transition">Ir al Stage Más Alto Actual</button>
+                </div>
+            </div>
+
+            <!-- TAB 3: SKILLS (SUB-PESTAÑAS DE CLASES + SWIPE/DRAG CON LÍNEAS SVG) -->
+            <div id="tab-content-Skills" class="tab-pane hidden flex flex-col space-y-2">
+                <div class="flex justify-between items-center bg-slate-900 border border-slate-800 rounded-xl p-2.5">
+                    <span class="text-xs font-semibold text-slate-300">Puntos de Habilidad Libres:</span>
+                    <span id="skill-points-display" class="font-bold text-amber-400 text-sm px-2.5 py-0.5 bg-amber-500/20 rounded-lg border border-amber-500/30">2</span>
+                </div>
+
+                <!-- Sub-pestañas para dividir las ramas de Skills -->
+                <div id="skill-subtabs-container" class="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800"></div>
+
+                <!-- Contenedor del árbol de habilidades con soporte de líneas SVG para arrastrar -->
+                <div class="relative bg-slate-950/80 border border-slate-800 rounded-xl p-3 min-h-[220px] flex flex-col justify-center items-center overflow-hidden" id="skill-tree-branch-view">
+                    <svg id="skill-svg-lines" class="absolute inset-0 w-full h-full pointer-events-none z-0"></svg>
+                    <div id="skill-nodes-container" class="relative z-10 flex flex-col sm:flex-row items-center justify-around w-full gap-4"></div>
+                </div>
+                <div class="text-[10px] text-slate-400 text-center italic">💡 Consejo: Haz drag/swipe o click secuencial del Nodo 1 al 2 y al 3 para activar el flujo de energía.</div>
+            </div>
+
+            <!-- TAB 4: MEJORA -->
+            <div id="tab-content-Mejoras" class="tab-pane hidden flex flex-col space-y-3 overflow-y-auto max-h-[350px] pr-1">
+                <h3 class="font-cinzel font-bold text-amber-400 text-sm mb-1">Arsenal y Mejoras del Héroe</h3>
+                <div id="upgrades-list" class="space-y-2"></div>
+            </div>
+
+            <!-- TAB 5: REBIRTH -->
+            <div id="tab-content-Rebirth" class="tab-pane hidden flex flex-col space-y-3 overflow-y-auto max-h-[350px] pr-1">
+                <div class="bg-slate-900 border border-purple-500/40 rounded-2xl p-4 text-center shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
+                    <h3 class="font-cinzel text-lg font-bold text-purple-400 mb-1">Renacimiento Temporal (Rebirth)</h3>
+                    <p class="text-xs text-slate-300 mb-2">Reinicia tu torre y nivel a cambio de <span class="text-cyan-400 font-bold">Cristales Temporales</span>.</p>
+                    <div class="text-[11px] text-amber-300 bg-amber-950/60 border border-amber-500/40 rounded-lg p-2 mb-3">
+                        ⚠️ <strong>Requisito:</strong> Nivel 20 o Torre 3 alcanzada.
+                    </div>
+                    
+                    <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 mb-4 flex justify-around text-xs">
+                        <div>
+                            <span class="text-slate-400 block">Renacimientos</span>
+                            <span id="rebirth-count-display" class="font-bold text-purple-400 text-base">0</span>
+                        </div>
+                        <div class="w-px bg-slate-800"></div>
+                        <div>
+                            <span class="text-slate-400 block">Cristales a Ganar</span>
+                            <span id="rebirth-gain-preview" class="font-bold text-cyan-400 text-base">+1</span>
+                        </div>
+                    </div>
+
+                    <button onclick="triggerRebirth()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg transition mb-4">Ejecutar Renacimiento</button>
+
+                    <h4 class="font-cinzel text-xs font-bold text-cyan-400 mb-2 uppercase tracking-wider text-left">Tienda de Cristales</h4>
+                    <div id="crystal-shop-list" class="space-y-2 text-left"></div>
+                </div>
+            </div>
+
+            <!-- TAB 6: LOGROS -->
+            <div id="tab-content-Logros" class="tab-pane hidden flex flex-col space-y-3 overflow-y-auto max-h-[350px] pr-1">
+                <h3 class="font-cinzel font-bold text-amber-400 text-sm mb-1">Hazañas y Recompensas (9 Logros)</h3>
+                <div id="achievements-list" class="space-y-2"></div>
+            </div>
+
+            <!-- TAB 7: GLOBAL -->
+            <div id="tab-content-Global" class="tab-pane hidden flex flex-col space-y-3 overflow-y-auto max-h-[350px] pr-1">
+                <h3 class="font-cinzel font-bold text-amber-400 text-sm mb-1">Ranking Global</h3>
+                <p class="text-[11px] text-slate-400 mb-2">Ordenado por máxima torre y stage alcanzado.</p>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+                    <div id="global-ranking-list" class="space-y-2 text-xs">
+                        <div class="text-center text-slate-500 py-4">Cargando ranking global...</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- NAVIGATION TABS BAR -->
+        <nav class="bg-slate-900/95 border border-slate-800 rounded-2xl p-1.5 grid grid-cols-7 gap-1 shadow-2xl mt-2">
+            <button onclick="switchTab('Batalla')" id="nav-btn-Batalla" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-amber-400 bg-amber-500/15 border border-amber-500/30 transition relative">
+                <span class="text-base">⚔️</span>
+                <span class="text-[9px] font-bold mt-0.5">Batalla</span>
+            </button>
+            <button onclick="switchTab('Torre')" id="nav-btn-Torre" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 transition relative">
+                <span class="text-base">🏰</span>
+                <span class="text-[9px] font-bold mt-0.5">Torre</span>
+            </button>
+            <button onclick="switchTab('Skills')" id="nav-btn-Skills" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 transition relative">
+                <span class="text-base">🌳</span>
+                <span class="text-[9px] font-bold mt-0.5">Skills</span>
+                <span id="badge-Skills" class="hidden absolute top-1 right-1 w-4 h-4 bg-red-600 text-white rounded-full text-[9px] font-bold flex items-center justify-center animate-pulse">!</span>
+            </button>
+            <button onclick="switchTab('Mejoras')" id="nav-btn-Mejoras" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 transition relative">
+                <span class="text-base">🔨</span>
+                <span class="text-[9px] font-bold mt-0.5">Mejoras</span>
+                <span id="badge-Mejoras" class="hidden absolute top-1 right-1 w-4 h-4 bg-red-600 text-white rounded-full text-[9px] font-bold flex items-center justify-center animate-pulse">!</span>
+            </button>
+            <button onclick="switchTab('Rebirth')" id="nav-btn-Rebirth" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 transition relative">
+                <span class="text-base">🔮</span>
+                <span class="text-[9px] font-bold mt-0.5">Renacer</span>
+            </button>
+            <button onclick="switchTab('Logros')" id="nav-btn-Logros" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 transition relative">
+                <span class="text-base">🏆</span>
+                <span class="text-[9px] font-bold mt-0.5">Logros</span>
+            </button>
+            <button onclick="switchTab('Global')" id="nav-btn-Global" class="nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 transition relative">
+                <span class="text-base">🌐</span>
+                <span class="text-[9px] font-bold mt-0.5">Global</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDe2OtAdDFWOml4v6EuISnPhYI-0xx8kOU",
+            authDomain: "chronos-tap.firebaseapp.com",
+            databaseURL: "https://chronos-tap-default-rtdb.firebaseio.com",
+            projectId: "chronos-tap",
+            storageBucket: "chronos-tap.firebasestorage.app",
+            messagingSenderId: "755222927108",
+            appId: "1:755222927108:web:82744c3626e7a125c92251",
+            measurementId: "G-WGZLCFN2GH"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const rdb = firebase.database();
+
+        let currentUser = null;
+        let currentPassword = null;
+        let heroesList = [];
+        let activeHeroIndex = 0;
+        let gameData = null;
+        let selectedNewClass = 'Guerrero';
+        let currentViewingTower = 1;
+        let enemyMaxHp = 50;
+        let enemyHp = 50;
+        let enemyTimer = 15;
+        let timerInterval = null;
+        
+        let bossShieldActive = false;
+        let qteSequence = [];
+        let currentQteIndex = 0;
+        let activeSkillSubTab = 0;
+
+        // Variables para la mecánica de arrastre (drag/swipe) de nodos y líneas conectadas
+        let draggingNodeIndex = null;
+        let dragConnectedNodes = [0];
+
+        const classDefinitions = {
+            Guerrero: {
+                icon: '⚔️',
+                branches: [
+                    { 
+                        name: 'Fuerza Bruta', 
+                        skills: [
+                            {id:'g1', name:'Golpe Titánico', maxLevel:5, reqPoints:0, desc:'+8 daño base por nivel.'}, 
+                            {id:'g2', name:'Filo Voraz', maxLevel:5, reqPoints:5, desc:'+18 daño base por nivel. Req. 5 ptos.'},
+                            {id:'g3', name:'Coloso Imparable', maxLevel:5, reqPoints:5, desc:'+45 daño base por nivel. Req. 5 ptos.'}
+                        ] 
+                    },
+                    { 
+                        name: 'Baluarte', 
+                        skills: [
+                            {id:'g4', name:'Piel de Acero', maxLevel:5, reqPoints:0, desc:'+12% Oro obtenido por nivel.'}, 
+                            {id:'g5', name:'Fortaleza', maxLevel:5, reqPoints:5, desc:'+25% Oro obtenido por nivel. Req. 5 ptos.'},
+                            {id:'g6', name:'Tesoro del Rey', maxLevel:5, reqPoints:5, desc:'+60% Oro obtenido por nivel. Req. 5 ptos.'}
+                        ] 
+                    },
+                    { 
+                        name: 'Maestría', 
+                        skills: [
+                            {id:'g7', name:'Reflejos', maxLevel:5, reqPoints:0, desc:'+2 DPS automático por nivel.'}, 
+                            {id:'g8', name:'Golpe Crítico', maxLevel:5, reqPoints:5, desc:'+7 DPS automático por nivel. Req. 5 ptos.'},
+                            {id:'g9', name:'Maestro de Armas', maxLevel:5, reqPoints:5, desc:'+20 DPS automático por nivel. Req. 5 ptos.'}
+                        ] 
+                    }
+                ]
+            },
+            Mago: {
+                icon: '🔮',
+                branches: [
+                    { 
+                        name: 'Conjuros Arcanos', 
+                        skills: [
+                            {id:'m1', name:'Misil Mágico', maxLevel:5, reqPoints:0, desc:'+8 daño base por nivel.'}, 
+                            {id:'m2', name:'Orbe de Fuego', maxLevel:5, reqPoints:5, desc:'+18 daño base por nivel. Req. 5 ptos.'},
+                            {id:'m3', name:'Supernova', maxLevel:5, reqPoints:5, desc:'+45 daño base por nivel. Req. 5 ptos.'}
+                        ] 
+                    },
+                    { 
+                        name: 'Sabiduría', 
+                        skills: [
+                            {id:'m4', name:'Mente Clara', maxLevel:5, reqPoints:0, desc:'+12% Oro obtenido por nivel.'}, 
+                            {id:'m5', name:'Meditación', maxLevel:5, reqPoints:5, desc:'+25% Oro obtenido por nivel. Req. 5 ptos.'},
+                            {id:'m6', name:'Trascendencia', maxLevel:5, reqPoints:5, desc:'+60% Oro obtenido por nivel. Req. 5 ptos.'}
+                        ] 
+                    },
+                    { 
+                        name: 'Tormenta Elemental', 
+                        skills: [
+                            {id:'m7', name:'Chispa', maxLevel:5, reqPoints:0, desc:'+2 DPS automático por nivel.'}, 
+                            {id:'m8', name:'Rayo', maxLevel:5, reqPoints:5, desc:'+7 DPS automático por nivel. Req. 5 ptos.'},
+                            {id:'m9', name:'Tempestad', maxLevel:5, reqPoints:5, desc:'+20 DPS automático por nivel. Req. 5 ptos.'}
+                        ] 
+                    }
+                ]
+            },
+            Arquero: {
+                icon: '🏹',
+                branches: [
+                    { 
+                        name: 'Tiro Certero', 
+                        skills: [
+                            {id:'a1', name:'Flecha Precisa', maxLevel:5, reqPoints:0, desc:'+8 daño base por nivel.'}, 
+                            {id:'a2', name:'Ojo de Halcón', maxLevel:5, reqPoints:5, desc:'+18 daño base por nivel. Req. 5 ptos.'},
+                            {id:'a3', name:'Tiro Mortal', maxLevel:5, reqPoints:5, desc:'+45 daño base por nivel. Req. 5 ptos.'}
+                        ] 
+                    },
+                    { 
+                        name: 'Agilidad Silvestre', 
+                        skills: [
+                            {id:'a4', name:'Paso Ligero', maxLevel:5, reqPoints:0, desc:'+12% Oro obtenido por nivel.'}, 
+                            {id:'a5', name:'Evasión', maxLevel:5, reqPoints:5, desc:'+25% Oro obtenido por nivel. Req. 5 ptos.'},
+                            {id:'a6', name:'Viento Veloz', maxLevel:5, reqPoints:5, desc:'+60% Oro obtenido por nivel. Req. 5 ptos.'}
+                        ] 
+                    },
+                    { 
+                        name: 'Ráfaga Continua', 
+                        skills: [
+                            {id:'a7', name:'Doble Flecha', maxLevel:5, reqPoints:0, desc:'+2 DPS automático por nivel.'}, 
+                            {id:'a8', name:'Lluvia', maxLevel:5, reqPoints:5, desc:'+7 DPS automático por nivel. Req. 5 ptos.'},
+                            {id:'a9', name:'Tormenta de Flechas', maxLevel:5, reqPoints:5, desc:'+20 DPS automático por nivel. Req. 5 ptos.'}
+                        ] 
+                    }
+                ]
+            }
+        };
+
+        const defaultUpgrades = [
+            { id: 'dmg1', name: 'Espada de Acero Rúnico', cost: 35, mult: 1.45, level: 0, maxLevel: null, desc: '+4 Daño por toque' },
+            { id: 'dps1', name: 'Autómata del Tiempo', cost: 90, mult: 1.5, level: 0, maxLevel: null, desc: '+2 DPS automático' },
+            { id: 'gold1', name: 'Amuleto de Midas', cost: 150, mult: 1.55, level: 0, maxLevel: 10, desc: '+30% Oro obtenido' }
+        ];
+
+        const defaultCrystalShop = [
+            { id: 'cs1', name: 'Bendición del Chronomante', cost: 3, level: 0, max: 5, desc: '+15% Daño global por cristal.' },
+            { id: 'cs2', name: 'Fiebre de Oro Ancestral', cost: 5, level: 0, max: 3, desc: '+50% Oro pasivo por cristal.' },
+            { id: 'cs3', name: 'Zancada del Tiempo', cost: 4, level: 0, max: 5, desc: 'Reduce un 5% el temporizador.' },
+            { id: 'cs4', name: 'Sabiduría de los Æons', cost: 6, level: 0, max: 5, desc: '+20% Experiencia obtenida.' },
+            { id: 'cs5', name: 'Filo Crítico Estelar', cost: 8, level: 0, max: 4, desc: '+10% Probabilidad de crítico x2.' },
+            { id: 'cs6', name: 'Aura de Regeneración', cost: 5, level: 0, max: 5, desc: '+5 DPS pasivo adicional.' },
+            { id: 'cs7', name: 'Inversión Cronológica', cost: 7, level: 0, max: 3, desc: 'Reduce 10% coste de mejoras.' },
+            { id: 'cs8', name: 'Bendición de los Dioses', cost: 10, level: 0, max: 3, desc: '+1 punto de habilidad al subir de nivel.' }
+        ];
+
+        const defaultAchievements = [
+            { id: 'ach1', name: 'Primeros Pasos', desc: 'Derrota 10 enemigos.', target: 10, progress: 0, rewardCrystals: 2, claimed: false },
+            { id: 'ach2', name: 'Guerrero del Rift', desc: 'Alcanza el Nivel 5.', target: 5, progress: 1, rewardCrystals: 5, claimed: false },
+            { id: 'ach3', name: 'Crononauta', desc: 'Realiza tu primer Rebirth.', target: 1, progress: 0, rewardCrystals: 10, claimed: false },
+            { id: 'ach4', name: 'Cazador de Jefes', desc: 'Derrota 5 Jefes de Stage 10.', target: 5, progress: 0, rewardCrystals: 8, claimed: false },
+            { id: 'ach5', name: 'Veterano del Tiempo', desc: 'Alcanza la Torre 3.', target: 3, progress: 1, rewardCrystals: 12, claimed: false },
+            { id: 'ach6', name: 'Acribillador', desc: 'Realiza 500 toques.', target: 500, progress: 0, rewardCrystals: 6, claimed: false },
+            { id: 'ach7', name: 'Maestro de la Riqueza', desc: 'Acumula 5,000 monedas de oro.', target: 5000, progress: 0, rewardCrystals: 7, claimed: false },
+            { id: 'ach8', name: 'Ascenso Divino', desc: 'Alcanza Nivel 25.', target: 25, progress: 1, rewardCrystals: 15, claimed: false },
+            { id: 'ach9', name: 'Coleccionista de Cristales', desc: 'Consigue 20 Cristales.', target: 20, progress: 0, rewardCrystals: 20, claimed: false }
+        ];
+
+        function showAuthError(msg) {
+            const box = document.getElementById('auth-error-box');
+            box.innerText = msg;
+            box.classList.remove('hidden');
+            setTimeout(() => box.classList.add('hidden'), 5000);
+        }
+
+        function handleLogin() {
+            const user = document.getElementById('auth-username').value.trim();
+            const pass = document.getElementById('auth-password').value.trim();
+            if (!user || !pass) { showAuthError('⚠️ Ingresa usuario y contraseña.'); return; }
+            rdb.ref('users/' + user).once('value', snapshot => {
+                const data = snapshot.val();
+                if (!data) { showAuthError('❌ El usuario no existe.'); return; }
+                if (data.password !== pass) { showAuthError('❌ Contraseña incorrecta.'); return; }
+                currentUser = user;
+                currentPassword = pass;
+                heroesList = data.heroes || [];
+                document.getElementById('auth-screen').classList.add('hidden');
+                if (heroesList.length === 0) openHeroSelector(); else loadHero(0);
+            });
+        }
+
+        function handleRegister() {
+            const user = document.getElementById('auth-username').value.trim();
+            const pass = document.getElementById('auth-password').value.trim();
+            if (!user || !pass) { showAuthError('⚠️ Ingresa credenciales válidas.'); return; }
+            rdb.ref('users/' + user).once('value', snapshot => {
+                if (snapshot.exists()) { showAuthError('⚠️ El usuario ya existe.'); return; }
+                rdb.ref('users/' + user).set({ password: pass, heroes: [] }).then(() => {
+                    currentUser = user;
+                    currentPassword = pass;
+                    heroesList = [];
+                    document.getElementById('auth-screen').classList.add('hidden');
+                    openHeroSelector();
+                });
+            });
+        }
+
+        function logout() {
+            currentUser = null;
+            currentPassword = null;
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('hero-select-screen').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+        }
+
+        function openHeroSelector() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('hero-select-screen').classList.remove('hidden');
+            const container = document.getElementById('hero-slots-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const hero = heroesList[i];
+                if (hero) {
+                    container.innerHTML += `
+                        <div class="bg-slate-950 border border-amber-500/40 rounded-xl p-4 flex flex-col justify-between shadow-lg">
+                            <div>
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="text-2xl">${classDefinitions[hero.class].icon}</span>
+                                    <div>
+                                        <h4 class="font-cinzel font-bold text-amber-400 text-sm">${hero.name}</h4>
+                                        <span class="text-[10px] uppercase text-slate-400">${hero.class} • Nv. ${hero.level}</span>
+                                    </div>
+                                </div>
+                                <div class="text-[11px] text-slate-300">Torre ${hero.currentTower} - Stage ${hero.currentStage}/10</div>
+                                <div class="text-[10px] text-purple-400">Rebirths: ${hero.rebirths || 0}</div>
+                            </div>
+                            <button onclick="loadHero(${i})" class="w-full mt-3 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-lg text-xs transition">Jugar con ${hero.name}</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML += `
+                        <div class="bg-slate-950 border border-slate-800 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center">
+                            <span class="text-2xl text-slate-600 mb-1">➕</span>
+                            <span class="text-xs text-slate-500 font-medium">Ranura Vacía</span>
+                        </div>
+                    `;
+                }
+            }
+            if (heroesList.length >= 3) document.getElementById('create-hero-section').classList.add('hidden');
+            else document.getElementById('create-hero-section').classList.remove('hidden');
+        }
+
+        function selectClass(className) {
+            selectedNewClass = className;
+            ['Guerrero', 'Mago', 'Arquero'].forEach(c => {
+                const btn = document.getElementById('class-btn-' + c);
+                btn.className = (c === className) 
+                    ? "class-btn p-2 rounded-xl border border-amber-500/60 bg-amber-500/20 text-amber-300 text-xs font-bold transition"
+                    : "class-btn p-2 rounded-xl border border-slate-700 bg-slate-950 text-slate-400 text-xs font-bold transition";
+            });
+        }
+
+        function createNewHero() {
+            const nameInput = document.getElementById('new-hero-name');
+            const errBox = document.getElementById('hero-create-error');
+            const name = nameInput.value.trim();
+            if (!name) { errBox.innerText = "⚠️ Ingresa un nombre válido."; errBox.classList.remove('hidden'); return; }
+            if (heroesList.some(h => h.name.toLowerCase() === name.toLowerCase())) {
+                errBox.innerText = "❌ Ya existe un héroe con ese nombre."; errBox.classList.remove('hidden'); return;
+            }
+            errBox.classList.add('hidden');
+            const newHero = {
+                name: name, class: selectedNewClass, level: 1, exp: 0, maxExp: 100, gold: 40, crystals: 0, rebirths: 0,
+                currentTower: 1, currentStage: 1, maxUnlockedTower: 1, maxUnlockedStage: 1,
+                damage: 12, dps: 0, skillPoints: 2, unlockedSkills: {},
+                upgrades: JSON.parse(JSON.stringify(defaultUpgrades)),
+                crystalShop: JSON.parse(JSON.stringify(defaultCrystalShop)),
+                achievements: JSON.parse(JSON.stringify(defaultAchievements))
+            };
+            heroesList.push(newHero);
+            rdb.ref('users/' + currentUser + '/heroes').set(heroesList).then(() => {
+                nameInput.value = '';
+                loadHero(heroesList.length - 1);
+            });
+        }
+
+        function loadHero(index) {
+            activeHeroIndex = index;
+            gameData = heroesList[index];
+            currentViewingTower = gameData.currentTower;
+            document.getElementById('hero-select-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            initGameSession();
+        }
+
+        function initGameSession() {
+            document.getElementById('header-username').innerText = gameData.name;
+            document.getElementById('header-class').innerText = gameData.class.toUpperCase();
+            document.getElementById('header-avatar-bg').innerText = classDefinitions[gameData.class].icon;
+            document.getElementById('tap-icon').innerText = classDefinitions[gameData.class].icon;
+            updateUI();
+            spawnEnemy();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(gameLoopTick, 1000);
+        }
+
+        function spawnEnemy() {
+            const isBoss = (gameData.currentStage === 10);
+            let timeMultiplier = 1;
+            if (gameData.crystalShop) {
+                const cs3 = gameData.crystalShop.find(x => x.id === 'cs3');
+                if (cs3) timeMultiplier = Math.max(0.5, 1 - (cs3.level * 0.05));
+            }
+            const multiplier = Math.pow(1.3, gameData.currentTower - 1) * Math.pow(1.15, gameData.currentStage - 1);
+            enemyMaxHp = Math.floor((isBoss ? 150 : 45) * multiplier);
+            enemyHp = enemyMaxHp;
+            enemyTimer = Math.max(5, Math.floor((isBoss ? 25 : 15) * timeMultiplier));
+
+            bossShieldActive = isBoss;
+            const shieldBox = document.getElementById('boss-shield-box');
+            if (bossShieldActive) {
+                shieldBox.classList.remove('hidden');
+                initBossQte();
+            } else {
+                shieldBox.classList.add('hidden');
+            }
+
+            document.getElementById('stage-badge').innerText = `TORRE ${gameData.currentTower} • ${isBoss ? '🔥 JEFE FINAL (10/10)' : 'STAGE ' + gameData.currentStage + '/10'}`;
+            document.getElementById('enemy-name').innerText = isBoss ? `Jefe Supremo` : `Guardián Temporal`;
+            updateEnemyHpUI();
+
+            // Disparador de Beneficios Aleatorios con Ritmo Moderado (cada ~8 a 15 enemigos)
+            if (Math.random() < 0.25) {
+                triggerRandomBenefit();
+            }
+        }
+
+        function triggerRandomBenefit() {
+            const benefits = [
+                { name: 'Surgimiento de Oro (+100 Monedas)', apply: () => { gameData.gold += 100; } },
+                { name: 'Oleada Temporal (+2 Puntos de Skill)', apply: () => { gameData.skillPoints += 2; } },
+                { name: 'Energía Astral (+50% Daño Temporal)', apply: () => { gameData.damage += 15; setTimeout(() => { if(gameData) gameData.damage = Math.max(12, gameData.damage - 15); }, 30000); } }
+            ];
+            const chosen = benefits[Math.floor(Math.random() * benefits.length)];
+            chosen.apply();
+            
+            const toast = document.getElementById('benefit-toast');
+            document.getElementById('benefit-toast-text').innerText = `¡Beneficio moderado! ${chosen.name}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+            updateUI();
+        }
+
+        function initBossQte() {
+            qteSequence = [1, 2, 3];
+            currentQteIndex = 0;
+            renderQteCircles();
+        }
+
+        function renderQteCircles() {
+            const layer = document.getElementById('qte-circles-layer');
+            layer.innerHTML = '';
+            if (!bossShieldActive) return;
+
+            qteSequence.forEach((num, idx) => {
+                if (idx < currentQteIndex) return;
+                const btn = document.createElement('div');
+                btn.className = 'absolute w-10 h-10 bg-blue-600 hover:bg-blue-500 rounded-full border-2 border-white qte-target cursor-pointer flex items-center justify-center text-xs font-bold text-white shadow-xl';
+                btn.innerText = num;
+                btn.style.top = (Math.sin(idx * 2) * 45 + 50) + '%';
+                btn.style.left = (Math.cos(idx * 2) * 45 + 50) + '%';
+                
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (num === qteSequence[currentQteIndex]) {
+                        currentQteIndex++;
+                        btn.remove();
+                        if (currentQteIndex >= qteSequence.length) {
+                            bossShieldActive = false;
+                            document.getElementById('boss-shield-box').classList.add('hidden');
+                            layer.innerHTML = '';
+                        } else {
+                            renderQteCircles();
+                        }
+                    }
+                };
+                layer.appendChild(btn);
+            });
+        }
+
+        function gameLoopTick() {
+            if (!gameData) return;
+            let crystalDpsBonus = 0;
+            if (gameData.crystalShop) {
+                const b = gameData.crystalShop.find(x => x.id === 'cs1');
+                if (b) crystalDpsBonus += (b.level * 2);
+                const cs6 = gameData.crystalShop.find(x => x.id === 'cs6');
+                if (cs6) crystalDpsBonus += (cs6.level * 5);
+            }
+            const totalDps = (gameData.dps + crystalDpsBonus);
+            if (totalDps > 0 && !bossShieldActive) {
+                damageEnemy(totalDps);
+            }
+            enemyTimer--;
+            if (enemyTimer <= 0) enemyTimer = 15;
+            document.getElementById('enemy-timer').innerText = enemyTimer + 's';
+        }
+
+        function handleTap(event) {
+            if (bossShieldActive) return;
+            const btn = document.getElementById('tap-target-btn');
+            btn.classList.add('click-pulse');
+            setTimeout(() => btn.classList.remove('click-pulse'), 80);
+
+            let crystalDmgBonus = 1;
+            if (gameData.crystalShop) {
+                const b = gameData.crystalShop.find(x => x.id === 'cs1');
+                if (b) crystalDmgBonus += (b.level * 0.15);
+            }
+
+            let finalTapDmg = Math.floor(gameData.damage * crystalDmgBonus);
+            if (gameData.crystalShop) {
+                const cs5 = gameData.crystalShop.find(x => x.id === 'cs5');
+                if (cs5 && cs5.level > 0 && Math.random() < (cs5.level * 0.1)) {
+                    finalTapDmg *= 2;
+                }
+            }
+
+            damageEnemy(finalTapDmg);
+            showFloatingDmg(event, '+' + finalTapDmg);
+            checkAchievementProgress('ach1', 1);
+            checkAchievementProgress('ach6', 1);
+        }
+
+        function damageEnemy(amount) {
+            if (bossShieldActive) return;
+            enemyHp -= amount;
+            if (enemyHp <= 0) {
+                enemyHp = 0;
+                defeatEnemy();
+            }
+            updateEnemyHpUI();
+        }
+
+        function defeatEnemy() {
+            let goldMulti = 1;
+            if (gameData.upgrades) {
+                const goldUp = gameData.upgrades.find(u => u.id === 'gold1');
+                if (goldUp) goldMulti += (goldUp.level * 0.3);
+            }
+            if (gameData.crystalShop) {
+                const goldCs = gameData.crystalShop.find(x => x.id === 'cs2');
+                if (goldCs) goldMulti += (goldCs.level * 0.5);
+            }
+
+            const isBoss = (gameData.currentStage === 10);
+            const earnedGold = Math.floor((isBoss ? 45 : 12) * Math.pow(1.25, gameData.currentTower - 1) * goldMulti);
+            const earnedExp = Math.floor(25 * Math.pow(1.15, gameData.currentTower - 1));
+
+            gameData.gold += earnedGold;
+            gameData.exp += earnedExp;
+
+            checkAchievementProgress('ach7', gameData.gold);
+            if (isBoss) checkAchievementProgress('ach4', 1);
+
+            if (gameData.exp >= gameData.maxExp) {
+                gameData.level++;
+                gameData.exp -= gameData.maxExp;
+                gameData.maxExp = Math.floor(gameData.maxExp * 1.35);
+                let extraPoints = 2;
+                if (gameData.crystalShop) {
+                    const cs8 = gameData.crystalShop.find(x => x.id === 'cs8');
+                    if (cs8) extraPoints += cs8.level;
+                }
+                gameData.skillPoints += extraPoints;
+                checkAchievementProgress('ach2', gameData.level);
+                checkAchievementProgress('ach8', gameData.level);
+            }
+
+            if (gameData.currentStage < 10) {
+                gameData.currentStage++;
+            } else {
+                gameData.currentTower++;
+                gameData.currentStage = 1;
+            }
+
+            if (gameData.currentTower > (gameData.maxUnlockedTower || 1)) gameData.maxUnlockedTower = gameData.currentTower;
+            if (gameData.currentStage > (gameData.maxUnlockedStage || 1)) gameData.maxUnlockedStage = gameData.currentStage;
+
+            checkAchievementProgress('ach5', gameData.maxUnlockedTower);
+            spawnEnemy();
+            updateUI();
+            saveGameToCloud();
+        }
+
+        function showFloatingDmg(event, text) {
+            const container = document.getElementById('floating-text-container');
+            const el = document.createElement('div');
+            el.className = 'absolute font-cinzel font-bold text-amber-300 text-base floating-dmg';
+            const rect = event.currentTarget.getBoundingClientRect();
+            el.style.left = (event.clientX ? event.clientX - rect.left : rect.width / 2) + 'px';
+            el.style.top = (event.clientY ? event.clientY - rect.top : rect.height / 2) + 'px';
+            el.innerText = text;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 600);
+        }
+
+        function updateEnemyHpUI() {
+            const pct = Math.max(0, Math.min(100, (enemyHp / enemyMaxHp) * 100));
+            document.getElementById('enemy-hp-bar').style.width = pct + '%';
+            document.getElementById('enemy-hp-text').innerText = enemyHp + ' / ' + enemyMaxHp;
+        }
+
+        function changeTowerWorld(dir) {
+            currentViewingTower += dir;
+            if (currentViewingTower < 1) currentViewingTower = 1;
+            if (currentViewingTower > gameData.maxUnlockedTower) currentViewingTower = gameData.maxUnlockedTower;
+            renderStagesGrid();
+        }
+
+        function renderStagesGrid() {
+            document.getElementById('world-display-title').innerText = `Torre ${currentViewingTower}`;
+            const grid = document.getElementById('stages-grid');
+            grid.innerHTML = '';
+            for (let s = 1; s <= 10; s++) {
+                const isUnlocked = (currentViewingTower < gameData.maxUnlockedTower) || (currentViewingTower === gameData.maxUnlockedTower && s <= gameData.maxUnlockedStage);
+                const isCurrent = (gameData.currentTower === currentViewingTower && gameData.currentStage === s);
+                let btnClass = isUnlocked ? "bg-slate-900 border-amber-500/40 text-amber-300 hover:bg-amber-500/20 cursor-pointer font-bold" : "bg-slate-950 border-slate-800 text-slate-600";
+                if (isCurrent) btnClass = "bg-amber-500/20 border-amber-500 text-amber-200 font-bold ring-2 ring-amber-500/50";
+                
+                grid.innerHTML += `
+                    <div class="p-2.5 rounded-xl border ${btnClass} text-center text-xs transition flex flex-col justify-between" ${isUnlocked ? `onclick="selectStageToFarm(${currentViewingTower},${s})"` : ''}>
+                        <span class="text-[10px] uppercase text-slate-400">Stage</span>
+                        <span class="text-sm font-cinzel">${s}${s === 10 ? ' 🔥' : ''}</span>
+                        <span class="text-[9px]">${isCurrent ? 'Actual' : (isUnlocked ? 'Farmear' : 'Bloq.')}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function selectStageToFarm(tower, stage) {
+            gameData.currentTower = tower;
+            gameData.currentStage = stage;
+            spawnEnemy();
+            switchTab('Batalla');
+            updateUI();
+        }
+
+        function fastForwardCurrentStage() {
+            gameData.currentTower = gameData.maxUnlockedTower;
+            gameData.currentStage = gameData.maxUnlockedStage;
+            spawnEnemy();
+            switchTab('Batalla');
+            updateUI();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.className = "nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 transition relative";
+            });
+            document.getElementById('tab-content-' + tabName).classList.remove('hidden');
+            document.getElementById('nav-btn-' + tabName).className = "nav-btn flex flex-col items-center justify-center py-2 rounded-xl text-amber-400 bg-amber-500/15 border border-amber-500/30 transition relative";
+            
+            if (tabName === 'Torre') { currentViewingTower = gameData.currentTower; renderStagesGrid(); }
+            else if (tabName === 'Skills') { renderSkillSubTabs(); renderSkillBranchTree(); }
+            else if (tabName === 'Mejoras') { renderUpgrades(); }
+            else if (tabName === 'Rebirth') { renderRebirthScreen(); }
+            else if (tabName === 'Logros') { renderAchievements(); }
+            else if (tabName === 'Global') { loadGlobalRanking(); }
+        }
+
+        function updateUI() {
+            document.getElementById('header-level').innerText = gameData.level;
+            document.getElementById('header-exp').innerText = gameData.exp;
+            document.getElementById('header-max-exp').innerText = gameData.maxExp;
+            document.getElementById('header-gold').innerText = gameData.gold;
+            document.getElementById('header-crystals').innerText = gameData.crystals || 0;
+            document.getElementById('stat-damage').innerText = gameData.damage;
+            
+            let crystalDpsBonus = 0;
+            if (gameData.crystalShop) {
+                const b = gameData.crystalShop.find(x => x.id === 'cs1');
+                if (b) crystalDpsBonus += (b.level * 2);
+                const cs6 = gameData.crystalShop.find(x => x.id === 'cs6');
+                if (cs6) crystalDpsBonus += (cs6.level * 5);
+            }
+            document.getElementById('stat-damage-dps').innerText = (gameData.dps + crystalDpsBonus);
+            document.getElementById('skill-points-display').innerText = gameData.skillPoints;
+
+            const badgeSkills = document.getElementById('badge-Skills');
+            if (gameData.skillPoints > 0) badgeSkills.classList.remove('hidden'); else badgeSkills.classList.add('hidden');
+        }
+
+        // Renderizado de Sub-pestañas para las Ramas de Habilidades
+        function renderSkillSubTabs() {
+            const def = classDefinitions[gameData.class];
+            const subtabsContainer = document.getElementById('skill-subtabs-container');
+            subtabsContainer.innerHTML = '';
+            def.branches.forEach((branch, idx) => {
+                const isActive = (activeSkillSubTab === idx);
+                subtabsContainer.innerHTML += `
+                    <button onclick="switchSkillSubTab(${idx})" class="py-1.5 px-2 rounded-lg text-xs font-bold transition ${isActive ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-900 text-slate-400 hover:text-slate-200'}">
+                        ${branch.name}
+                    </button>
+                `;
+            });
+        }
+
+        function switchSkillSubTab(idx) {
+            activeSkillSubTab = idx;
+            renderSkillSubTabs();
+            renderSkillBranchTree();
+        }
+
+        // Renderizado del árbol de habilidades con la mecánica táctil de arrastre (drag/swipe) y líneas SVG conectadas
+        function renderSkillBranchTree() {
+            const def = classDefinitions[gameData.class];
+            const branch = def.branches[activeSkillSubTab];
+            const container = document.getElementById('skill-nodes-container');
+            container.innerHTML = '';
+
+            branch.skills.forEach((skill, sIdx) => {
+                if (!gameData.unlockedSkills) gameData.unlockedSkills = {};
+                const currentLvl = gameData.unlockedSkills[skill.id] || 0;
+                const isMax = currentLvl >= skill.maxLevel;
+                
+                let meetsReq = true;
+                if (sIdx > 0) {
+                    const prevSkillId = branch.skills[sIdx - 1].id;
+                    if ((gameData.unlockedSkills[prevSkillId] || 0) < 5) meetsReq = false;
+                }
+
+                const canUpgrade = !isMax && meetsReq && gameData.skillPoints > 0;
+                let cardClass = isMax ? "bg-purple-950/60 border-purple-500/50 text-purple-300" : (canUpgrade ? "bg-amber-500/20 border-amber-500/80 text-amber-300 cursor-pointer" : "bg-slate-900 border-slate-800 text-slate-500");
+
+                container.innerHTML += `
+                    <div id="skill-node-${sIdx}" 
+                         draggable="true"
+                         ondragstart="onSkillDragStart(event, ${sIdx})"
+                         ondragover="event.preventDefault()"
+                         ondrop="onSkillDrop(event, ${sIdx})"
+                         onclick="upgradeSkill('${skill.id}')"
+                         class="relative tooltip-container p-3 rounded-xl border ${cardClass} transition w-28 text-center flex flex-col items-center justify-between shadow-lg">
+                        <div class="font-bold text-xs truncate w-full">${skill.name}</div>
+                        <div class="text-[10px] font-mono mt-1">${currentLvl}/${skill.maxLevel}</div>
+                        <div class="text-[9px] text-slate-400 mt-0.5">${isMax ? 'Dominado' : 'Subir'}</div>
+                        
+                        <div class="tooltip-box absolute left-0 bottom-full mb-2 w-48 bg-slate-900 border border-amber-500/60 rounded-xl p-2.5 text-[11px] text-slate-200 z-[9999] shadow-2xl pointer-events-none text-left">
+                            <div class="font-bold text-amber-400 mb-1">${skill.name} (${currentLvl}/${skill.maxLevel})</div>
+                            <div class="text-slate-300">${skill.desc}</div>
+                            ${!meetsReq ? '<div class="text-red-400 mt-1">⚠️ Requiere 5 ptos en anterior.</div>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            drawSkillSvgLines();
+        }
+
+        function onSkillDragStart(e, index) {
+            draggingNodeIndex = index;
+        }
+
+        function onSkillDrop(e, index) {
+            e.preventDefault();
+            if (draggingNodeIndex !== null && draggingNodeIndex !== index) {
+                if (!dragConnectedNodes.includes(index)) {
+                    dragConnectedNodes.push(index);
+                }
+                drawSkillSvgLines();
+            }
+        }
+
+        function drawSkillSvgLines() {
+            const svg = document.getElementById('skill-svg-lines');
+            svg.innerHTML = '';
+            const containerRect = document.getElementById('skill-tree-branch-view').getBoundingClientRect();
+            
+            for (let i = 0; i < 2; i++) {
+                const nodeA = document.getElementById(`skill-node-${i}`);
+                const nodeB = document.getElementById(`skill-node-${i+1}`);
+                if (nodeA && nodeB) {
+                    const rectA = nodeA.getBoundingClientRect();
+                    const rectB = nodeB.getBoundingClientRect();
+                    
+                    const x1 = rectA.left + rectA.width / 2 - containerRect.left;
+                    const y1 = rectA.top + rectA.height / 2 - containerRect.top;
+                    const x2 = rectB.left + rectB.width / 2 - containerRect.left;
+                    const y2 = rectB.top + rectB.height / 2 - containerRect.top;
+
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', x2);
+                    line.setAttribute('y2', y2);
+                    line.setAttribute('stroke', dragConnectedNodes.includes(i+1) ? '#f59e0b' : '#334155');
+                    line.setAttribute('stroke-width', '3');
+                    line.setAttribute('stroke-dasharray', '4');
+                    svg.appendChild(line);
+                }
+            }
+        }
+
+        function upgradeSkill(skillId) {
+            if (gameData.skillPoints <= 0) return;
+            if (!gameData.unlockedSkills) gameData.unlockedSkills = {};
+            const currentLvl = gameData.unlockedSkills[skillId] || 0;
+            if (currentLvl >= 5) return;
+
+            gameData.skillPoints--;
+            gameData.unlockedSkills[skillId] = currentLvl + 1;
+
+            if (skillId.includes('1')) gameData.damage += 8;
+            if (skillId.includes('2')) gameData.damage += 18;
+            if (skillId.includes('3')) gameData.damage += 45;
+            if (skillId.includes('7')) gameData.dps += 2;
+            if (skillId.includes('8')) gameData.dps += 7;
+            if (skillId.includes('9')) gameData.dps += 20;
+
+            updateUI();
+            renderSkillBranchTree();
+            saveGameToCloud();
+        }
+
+        function renderUpgrades() {
+            const container = document.getElementById('upgrades-list');
+            container.innerHTML = '';
+            let discountMulti = 1;
+            if (gameData.crystalShop) {
+                const cs7 = gameData.crystalShop.find(x => x.id === 'cs7');
+                if (cs7) discountMulti -= (cs7.level * 0.1);
+            }
+
+            gameData.upgrades.forEach((up, idx) => {
+                const currentCost = Math.max(1, Math.floor(up.cost * Math.pow(up.mult, up.level) * discountMulti));
+                const canAfford = gameData.gold >= currentCost;
+                const maxLevelText = up.maxLevel ? `/ ${up.maxLevel}` : '/ ∞';
+                const isMaxed = up.maxLevel && up.level >= up.maxLevel;
+
+                container.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-xs text-amber-300">${up.name} (Nv. ${up.level} ${maxLevelText})</div>
+                            <div class="text-[11px] text-slate-400">${up.desc}</div>
+                        </div>
+                        <button onclick="buyUpgrade(${idx})" ${isMaxed ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg font-bold text-xs transition ${isMaxed ? 'bg-slate-800 text-slate-500' : (canAfford ? 'bg-amber-600 hover:bg-amber-500 text-slate-950 shadow' : 'bg-slate-800 text-slate-500 cursor-not-allowed')}">
+                            ${isMaxed ? 'Máximo' : currentCost + ' Oro'}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function buyUpgrade(idx) {
+            const up = gameData.upgrades[idx];
+            let discountMulti = 1;
+            if (gameData.crystalShop) {
+                const cs7 = gameData.crystalShop.find(x => x.id === 'cs7');
+                if (cs7) discountMulti -= (cs7.level * 0.1);
+            }
+            const currentCost = Math.max(1, Math.floor(up.cost * Math.pow(up.mult, up.level) * discountMulti));
+            if (up.maxLevel && up.level >= up.maxLevel) return;
+            if (gameData.gold < currentCost) return;
+
+            gameData.gold -= currentCost;
+            up.level++;
+            if (idx === 0) gameData.damage += 4;
+            if (idx === 1) gameData.dps += 2;
+
+            updateUI();
+            renderUpgrades();
+            saveGameToCloud();
+        }
+
+        function renderRebirthScreen() {
+            document.getElementById('rebirth-count-display').innerText = gameData.rebirths || 0;
+            const gainPreview = Math.max(1, Math.floor(gameData.maxUnlockedTower / 2));
+            document.getElementById('rebirth-gain-preview').innerText = `+${gainPreview}`;
+
+            const container = document.getElementById('crystal-shop-list');
+            container.innerHTML = '';
+            gameData.crystalShop.forEach((cs, idx) => {
+                const canAfford = (gameData.crystals || 0) >= cs.cost;
+                const isMax = cs.level >= cs.max;
+                container.innerHTML += `
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex justify-between items-center text-xs">
+                        <div>
+                            <div class="font-bold text-cyan-300">${cs.name} (Nv. ${cs.level}/${cs.max})</div>
+                            <div class="text-[10px] text-slate-400">${cs.desc}</div>
+                        </div>
+                        <button onclick="buyCrystalItem(${idx})" ${isMax || !canAfford ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg font-bold transition ${isMax ? 'bg-slate-800 text-slate-500' : (canAfford ? 'bg-cyan-600 hover:bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-500 cursor-not-allowed')}">
+                            ${isMax ? 'Máximo' : cs.cost + ' 💎'}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function triggerRebirth() {
+            if (gameData.level < 20 && gameData.maxUnlockedTower < 3) {
+                alert('⚠️ Requisito no cumplido: Nivel 20 o Torre 3 necesarios.');
+                return;
+            }
+            const gain = Math.max(1, Math.floor(gameData.maxUnlockedTower / 2));
+            gameData.rebirths = (gameData.rebirths || 0) + 1;
+            gameData.crystals = (gameData.crystals || 0) + gain;
+            gameData.level = 1; gameData.exp = 0; gameData.maxExp = 100; gameData.gold = 50;
+            gameData.currentTower = 1; gameData.currentStage = 1; 
+            gameData.damage = 12 + (gameData.rebirths * 5); gameData.dps = 0; gameData.skillPoints = 2;
+            gameData.unlockedSkills = {};
+            gameData.upgrades = JSON.parse(JSON.stringify(defaultUpgrades));
+
+            checkAchievementProgress('ach3', 1);
+            checkAchievementProgress('ach9', gameData.crystals);
+            updateUI();
+            switchTab('Batalla');
+            spawnEnemy();
+            saveGameToCloud();
+            alert(`🔮 ¡Renacimiento Exitoso! Has obtenido +${gain} Cristales.`);
+        }
+
+        function buyCrystalItem(idx) {
+            const cs = gameData.crystalShop[idx];
+            if ((gameData.crystals || 0) < cs.cost || cs.level >= cs.max) return;
+            gameData.crystals -= cs.cost;
+            cs.level++;
+            cs.cost += 2;
+            updateUI();
+            renderRebirthScreen();
+            saveGameToCloud();
+        }
+
+        function renderAchievements() {
+            const container = document.getElementById('achievements-list');
+            container.innerHTML = '';
+            gameData.achievements.forEach((ach, idx) => {
+                container.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-xs text-amber-300">${ach.name} (+${ach.rewardCrystals} 💎)</div>
+                            <div class="text-[11px] text-slate-400">${ach.desc} (${Math.min(ach.progress, ach.target)}/${ach.target})</div>
+                        </div>
+                        <button onclick="claimAchievement(${idx})" ${ach.claimed || ach.progress < ach.target ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg font-bold text-xs transition ${ach.claimed ? 'bg-slate-800 text-slate-500' : (ach.progress >= ach.target ? 'bg-cyan-600 text-white shadow' : 'bg-slate-800 text-slate-500')}">
+                            ${ach.claimed ? 'Reclamado' : 'Reclamar'}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function checkAchievementProgress(achId, value) {
+            if (!gameData.achievements) return;
+            const ach = gameData.achievements.find(a => a.id === achId);
+            if (ach && !ach.claimed) {
+                ach.progress = Math.max(ach.progress, value);
+            }
+        }
+
+        function claimAchievement(idx) {
+            const ach = gameData.achievements[idx];
+            if (ach.claimed || ach.progress < ach.target) return;
+            ach.claimed = true;
+            gameData.crystals = (gameData.crystals || 0) + ach.rewardCrystals;
+            checkAchievementProgress('ach9', gameData.crystals);
+            updateUI();
+            renderAchievements();
+            saveGameToCloud();
+        }
+
+        function loadGlobalRanking() {
+            const listEl = document.getElementById('global-ranking-list');
+            listEl.innerHTML = '<div class="text-center text-slate-500 py-4">Cargando ranking global...</div>';
+            rdb.ref('users/').once('value', snapshot => {
+                const users = snapshot.val();
+                if (!users) { listEl.innerHTML = '<div class="text-center text-slate-500 py-4">No hay jugadores.</div>'; return; }
+                let rankings = [];
+                Object.keys(users).forEach(username => {
+                    const uData = users[username];
+                    if (uData.heroes && Array.isArray(uData.heroes)) {
+                        uData.heroes.forEach(h => {
+                            rankings.push({
+                                user: username, heroName: h.name, heroClass: h.class,
+                                rebirths: h.rebirths || 0, maxTower: h.maxUnlockedTower || 1, maxStage: h.maxUnlockedStage || 1, level: h.level || 1
+                            });
+                        });
+                    }
+                });
+                rankings.sort((a, b) => {
+                    if (b.maxTower !== a.maxTower) return b.maxTower - a.maxTower;
+                    if (b.maxStage !== a.maxStage) return b.maxStage - a.maxStage;
+                    if (b.rebirths !== a.rebirths) return b.rebirths - a.rebirths;
+                    return b.level - a.level;
+                });
+                listEl.innerHTML = '';
+                rankings.slice(0, 10).forEach((r, idx) => {
+                    listEl.innerHTML += `
+                        <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-amber-400">#${idx + 1}</span>
+                                <div>
+                                    <div class="font-semibold text-slate-200">${r.heroName} <span class="text-[10px] text-slate-400">(${r.user})</span></div>
+                                    <div class="text-[10px] text-slate-400">${r.heroClass} • Nv. ${r.level} • 🔮 ${r.rebirths}</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-amber-300 font-bold text-xs">Torre: ${r.maxTower}</div>
+                                <div class="text-[10px] text-slate-400">Stage: ${r.maxStage}/10</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function saveGameToCloud() {
+            if (!currentUser) return;
+            heroesList[activeHeroIndex] = gameData;
+            rdb.ref('users/' + currentUser + '/heroes').set(heroesList);
+        }
+    </script>
+</body>
+</html>
