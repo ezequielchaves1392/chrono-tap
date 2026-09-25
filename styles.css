@@ -1,0 +1,90 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #05050a;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.font-orbitron {
+    font-family: 'Orbitron', sans-serif;
+}
+
+.game-gradient {
+    background: radial-gradient(circle at center, #0f0f1a 0%, #05050a 100%);
+}
+
+.click-pulse {
+    animation: pulseClick 0.08s ease-in-out;
+}
+
+@keyframes pulseClick {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(0.92); filter: brightness(1.4); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes floatUpLong {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    70% { opacity: 1; transform: translateY(-50px) scale(1.15); }
+    100% { opacity: 0; transform: translateY(-90px) scale(1.2); }
+}
+
+.floating-dmg {
+    animation: floatUpLong 1.4s ease-out forwards;
+    pointer-events: none;
+    font-weight: 900;
+    font-size: 1.4rem;
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.9);
+}
+
+.floating-skill-text {
+    animation: floatUpLong 1.4s ease-out forwards;
+    pointer-events: none;
+    font-weight: 900;
+    font-size: 1.1rem;
+    white-space: nowrap;
+    text-shadow: 0 0 12px rgba(0,0,0,0.9);
+    z-index: 50;
+}
+
+.tooltip-container {
+    position: relative;
+}
+
+.tooltip-container:hover .tooltip-box {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-box {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+    z-index: 99999;
+    pointer-events: none;
+    position: absolute;
+}
+
+#skill-tree-viewport {
+    touch-action: none;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f0f1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1f1f3a;
+    border-radius: 3px;
+}

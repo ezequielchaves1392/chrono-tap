@@ -1,0 +1,1 @@
+Pedir que si hay una nueva funcionalidad se cree por aparte si es necesario y lo integramos al codigo
