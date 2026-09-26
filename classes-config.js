@@ -136,20 +136,3 @@ function getClassSpecificStarterSkill(className) {
     }
 }
 
-const defaultUpgrades = [
-    { id: 'dmg1', cat: 'hardware', sector: 1, name: 'Acelerador Neural', cost: 15, mult: 1.45, level: 0, maxLevel: null, desc: '+2 <span style="color:#ffffff; font-weight:bold;">Daño por Click</span>' },
-    { id: 'critdmg', cat: 'hardware', sector: 2, name: 'Optimizador de <span style="color:#ff9900; font-weight:bold;">Crítico</span>', cost: 40, mult: 1.5, level: 0, maxLevel: null, desc: '+5% <span style="color:#ff9900; font-weight:bold;">Daño Crítico</span>' },
-    { id: 'critprob', cat: 'hardware', sector: 3, name: 'Sensor de Probabilidad', cost: 50, mult: 1.55, level: 0, maxLevel: 300, desc: '+0.025% Prob. <span style="color:#ff9900; font-weight:bold;">Crítico</span>' },
-    { id: 'dotamp', cat: 'software', sector: 4, name: 'Amplificador de <span style="color:#9d00ff; font-weight:bold;">DoTs</span>', cost: 35, mult: 1.48, level: 0, maxLevel: null, desc: '+5 <span style="color:#9d00ff; font-weight:bold;">Daño DoT</span> global' },
-    { id: 'gold1', cat: 'software', sector: 5, name: 'Algoritmo de <span style="color:#f3e600; font-weight:bold;">Monetización</span>', cost: 60, mult: 1.52, level: 0, maxLevel: 20, desc: '+25% <span style="color:#f3e600; font-weight:bold;">Hype</span> obtenido' }
-];
-
-const defaultShardShop = [
-    { id: 'ss1', name: 'Núcleo Cuántico Supremo', cost: 3, mult: 1.75, level: 0, max: 20, desc: '+25% <span style="color:#ffffff; font-weight:bold;">Daño global</span>.' },
-    { id: 'ss2', name: 'Sintetizador de <span style="color:#f3e600; font-weight:bold;">Hype</span>', cost: 4, mult: 1.7, level: 0, max: 15, desc: '+40% <span style="color:#f3e600; font-weight:bold;">Hype</span> por combate.' }
-];
-
-const defaultAchievements = [
-    { id: 'ach1', name: 'Primeros Scripts', desc: 'Derrota 10 firewalls.', target: 10, progress: 0, rewardCrystals: 3, claimed: false },
-    { id: 'ach2', name: 'Arquitecto Pro', desc: 'Alcanza el Nivel 5.', target: 5, progress: 1, rewardCrystals: 5, claimed: false }
-];

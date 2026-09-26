@@ -50,6 +50,36 @@
         </div>
     </div>
 
+    <!-- PANTALLA DE CREACIÓN DE PERSONAJE POR SLOT -->
+    <div id="hero-creation-screen" class="fixed inset-0 z-50 bg-[#05050a]/95 backdrop-blur-md flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="max-w-xl w-full bg-cyber-panel border border-cyber-border rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold text-cyber-neonCyan font-orbitron">NUEVO OPERATIVO EN RED</h3>
+                <button onclick="cancelCharacterCreation()" class="text-xs text-slate-400 hover:text-red-400 font-orbitron">✕ Cancelar</button>
+            </div>
+            <div>
+                <label class="text-xs text-slate-300 block mb-1 font-orbitron">Nombre del Operativo:</label>
+                <input type="text" id="new-hero-name" placeholder="Ej. CyberWizz" class="w-full bg-cyber-bg border border-cyber-border rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyber-neonCyan" />
+            </div>
+            <div>
+                <label class="text-xs text-slate-300 block mb-2 font-orbitron">Selecciona una Clase:</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" id="class-btn-PromptEngineer" onclick="selectClass('PromptEngineer')" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold transition text-center truncate font-orbitron">Prompt Engineer</button>
+                    <button type="button" id="class-btn-AISwarmMaster" onclick="selectClass('AISwarmMaster')" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold transition text-center truncate font-orbitron">AISwarm Master</button>
+                    <button type="button" id="class-btn-QuantumArchitect" onclick="selectClass('QuantumArchitect')" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold transition text-center truncate font-orbitron">Quantum Architect</button>
+                    <button type="button" id="class-btn-CyberSamurai" onclick="selectClass('CyberSamurai')" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold transition text-center truncate font-orbitron">Cyber Samurai</button>
+                    <button type="button" id="class-btn-NeuralHacker" onclick="selectClass('NeuralHacker')" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold transition text-center truncate font-orbitron">Neural Hacker</button>
+                    <button type="button" id="class-btn-VoidWeaver" onclick="selectClass('VoidWeaver')" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold transition text-center truncate font-orbitron">Void Weaver</button>
+                </div>
+            </div>
+            <div id="class-description-box" class="bg-cyber-bg p-3 rounded-xl border border-cyber-border text-xs text-slate-300">
+                <!-- Aquí se renderiza dinámicamente el gráfico de radar y el lore -->
+            </div>
+            <div id="hero-create-error" class="text-xs text-red-400 hidden font-bold"></div>
+            <button onclick="createNewHero()" class="w-full py-2.5 bg-gradient-to-r from-cyber-neonCyan to-cyber-neonPink text-black font-bold font-orbitron rounded-xl text-xs shadow hover:opacity-90 transition active:scale-95">Desplegar Operativo</button>
+        </div>
+    </div>
+
     <!-- AUTH SCREEN -->
     <div id="auth-screen" class="fixed inset-0 z-50 bg-[#05050a]/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
         <div class="max-w-md w-full bg-cyber-panel border border-cyber-border rounded-2xl p-6 shadow-neon-cyan relative">
@@ -90,7 +120,7 @@
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h2 class="font-orbitron text-base font-bold text-cyber-neonCyan">Selección de Personajes</h2>
-                    <p class="text-xs text-slate-400">Nave Orbital y builds iniciales.</p>
+                    <p class="text-xs text-slate-400">Nave Orbital y selección de ranuras.</p>
                 </div>
                 <button onclick="logout()" class="text-xs bg-cyber-bg hover:bg-cyber-border text-slate-300 px-3 py-1.5 rounded-xl border border-cyber-border font-orbitron">Salir</button>
             </div>
@@ -100,33 +130,7 @@
                 <label for="logged-tutorial-check" class="text-xs text-cyber-neonYellow font-orbitron cursor-pointer">Activar Tutorial Guía Inteligente en incursiones</label>
             </div>
 
-            <div id="hero-slots-container" class="grid grid-cols-1 gap-3 mb-4"></div>
-
-            <div id="create-hero-section" class="border-t border-cyber-border pt-4">
-                <h3 class="text-xs font-bold text-cyber-neonYellow mb-2 uppercase tracking-wider font-orbitron">Desplegar Nuevo Personaje</h3>
-                <div id="hero-create-error" class="hidden mb-2 text-xs text-red-400 font-semibold"></div>
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Nombre Único Global</label>
-                        <input type="text" id="new-hero-name" placeholder="Ej: Ese" class="w-full bg-cyber-bg border border-cyber-border focus:border-cyber-neonCyan rounded-xl px-4 py-2.5 text-sm text-slate-100 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Clase y Habilidad Inicial</label>
-                        <div class="grid grid-cols-3 gap-2 mb-2">
-                            <button type="button" onclick="selectClass('PromptEngineer')" id="class-btn-PromptEngineer" class="class-btn p-2 rounded-xl border border-cyber-neonCyan bg-cyber-neonCyan/20 text-cyber-neonCyan text-[10px] font-bold font-orbitron transition text-center truncate">Prompt Engineer</button>
-                            <button type="button" onclick="selectClass('AISwarmMaster')" id="class-btn-AISwarmMaster" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold font-orbitron transition text-center truncate">AISwarm Master</button>
-                            <button type="button" onclick="selectClass('QuantumArchitect')" id="class-btn-QuantumArchitect" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold font-orbitron transition text-center truncate">Quantum Architect</button>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button type="button" onclick="selectClass('CyberSamurai')" id="class-btn-CyberSamurai" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold font-orbitron transition text-center truncate">Cyber Samurai</button>
-                            <button type="button" onclick="selectClass('NeuralHacker')" id="class-btn-NeuralHacker" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold font-orbitron transition text-center truncate">Neural Hacker</button>
-                            <button type="button" onclick="selectClass('VoidWeaver')" id="class-btn-VoidWeaver" class="class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold font-orbitron transition text-center truncate">Void Weaver</button>
-                        </div>
-                        <div id="class-description-box" class="mt-2 p-3 bg-cyber-bg rounded-xl border border-cyber-border text-xs text-slate-300 leading-relaxed"></div>
-                    </div>
-                    <button onclick="createNewHero()" class="w-full py-3 bg-gradient-to-r from-cyber-neonPink to-cyber-neonPurple hover:opacity-90 text-white font-orbitron font-bold rounded-xl text-sm shadow-neon-pink transition active:scale-95">Crear Personaje</button>
-                </div>
-            </div>
+            <div id="hero-slots-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2"></div>
         </div>
     </div>
 
@@ -228,7 +232,7 @@
                         <div id="nave-stats-grid" class="grid grid-cols-2 gap-1 text-[10px] text-slate-300"></div>
                     </div>
 
-                    <!-- REPRODUCTOR ESTELAR (Sin nombre de pista) -->
+                    <!-- REPRODUCTOR ESTELAR -->
                     <div id="music-player-box" class="mb-1.5 p-2 bg-cyber-bg border border-cyber-neonCyan/40 rounded-xl">
                         <div class="flex justify-between items-center text-[10px] font-orbitron text-cyber-neonCyan mb-1">
                             <span>🎵 Reproductor Estelar</span>
@@ -515,7 +519,7 @@
 
     </div>
 
-<!-- SCRIPTS MODULARIZADOS -->
+    <!-- SCRIPTS MODULARIZADOS -->
     <script src="classes-config.js"></script>
     <script src="music.js"></script>
     <script src="game.js"></script>

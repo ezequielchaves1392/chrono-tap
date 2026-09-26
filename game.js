@@ -20,6 +20,7 @@ let heroesList = [];
 let activeHeroIndex = -1;
 let gameData = null;
 let selectedNewClass = 'PromptEngineer';
+let currentTargetSlot = -1;
 let currentViewingTower = 1;
 let enemyMaxHp = 30;
 let enemyHp = 30;
@@ -33,6 +34,7 @@ let activeSkillSubTab = 0;
 let activeUpgradeSubTab = 'hardware';
 let activeShardSubTab = 'shop';
 let activeSelectingSlot = -1;
+let isLightModeActive = false;
 
 let activeGlobalDotsList = [];
 
@@ -44,12 +46,104 @@ let startX = 0, startY = 0;
 
 let skillCooldowns = {};
 
+// Lore y Estadísticas de Radar para las Clases (Vértices: DoT, Click, Crit, CD, Recursos)
+const classLoreData = {
+    PromptEngineer: {
+        name: "Prompt Engineer",
+        role: "Especialista en Comandos de Red y Automatización Estándar",
+        lore: "Maestro en la estructuración sintáctica de instrucciones de alta eficiencia. Su enfoque se basa en optimizar los flujos de datos básicos y garantizar una entrada de comandos fluida y contundente en cualquier subrutina hostil.",
+        stats: { dot: 2, click: 5, crit: 3, cd: 3, recursos: 4 }
+    },
+    AISwarmMaster: {
+        name: "AI Swarm Master",
+        role: "Comandante de Enjambres de Subprocesos y Daño en el Tiempo",
+        lore: "Especializado en desplegar múltiples hilos autónomos que erosionan los firewalls enemigos mediante efectos de sangrado digital y DoT acumulativo constante en la red.",
+        stats: { dot: 5, click: 2, crit: 2, cd: 4, recursos: 3 }
+    },
+    QuantumArchitect: {
+        name: "Quantum Architect",
+        role: "Manipulador de Matrices Cuánticas y Reducción de Enfriamientos",
+        lore: "Arquitecto de realidades de procesamiento superpuestas. Destaca por recalibrar los ciclos temporales de la nave, reduciendo drásticamente los CD de las habilidades y estabilizando los núcleos.",
+        stats: { dot: 3, click: 3, crit: 3, cd: 5, recursos: 3 }
+    },
+    CyberSamurai: {
+        name: "Cyber Samurai",
+        role: "Ejecutor de Asaltos Críticos y Cortes de Precisión",
+        lore: "Guerrero de código binario enfocado en la agudeza letal. Sus algoritmos priorizan la ruptura de vulnerabilidades críticas y golpes decisivos capaces de desestabilizar jefes de sector al primer contacto.",
+        stats: { dot: 1, click: 4, crit: 5, cd: 3, recursos: 2 }
+    },
+    NeuralHacker: {
+        name: "Neural Hacker",
+        role: "Extractor de Recursos y Sobrecarga de Datos",
+        lore: "Experto en infiltración y minería de flujos económicos. Maximiza la obtención de Hype y recursos digitales por cada subrutina neutralizada, acelerando el crecimiento de hardware.",
+        stats: { dot: 3, click: 3, crit: 2, cd: 3, recursos: 5 }
+    },
+    VoidWeaver: {
+        name: "Void Weaver",
+        role: "Tejedor del Vacío y Potenciador Híbrido",
+        lore: "Entidad capaz de manipular los espacios vacíos entre paquetes de red. Combina versatilidad táctica con un control absoluto sobre el flujo de energía oscura y daño elemental.",
+        stats: { dot: 4, click: 3, crit: 4, cd: 3, recursos: 3 }
+    }
+};
+
+// Definiciones de Mejoras y Tienda de Shards (10%)
+const defaultUpgrades = [
+    { id: 'dmg1', name: 'Optimizador de Núcleo', desc: 'Aumenta el daño base por nivel.', level: 0, cost: 15, mult: 1.15, maxLevel: 100, sector: 1, cat: 'hardware', perLvl: '+2 Daño Base', getVal: (lvl) => `+${lvl * 2} Daño Total` },
+    { id: 'critprob', name: 'Algoritmo de Crítico', desc: 'Aumenta la probabilidad de golpe crítico.', level: 0, cost: 50, mult: 1.25, maxLevel: 30, sector: 1, cat: 'software', perLvl: '+2.5% Prob. Crítica', getVal: (lvl) => `+${(lvl * 2.5).toFixed(1)}% Total` },
+    { id: 'critdmg', name: 'Multiplicador de Ruptura', desc: 'Aumenta el daño crítico.', level: 0, cost: 100, mult: 1.3, maxLevel: 25, sector: 2, cat: 'software', perLvl: '+5% Daño Crítico', getVal: (lvl) => `+${lvl * 5}% Total` },
+    { id: 'gold1', name: 'Extractor de Hype', desc: 'Aumenta la cantidad de Hype obtenida.', level: 0, cost: 25, mult: 1.2, maxLevel: 50, sector: 1, cat: 'hardware', perLvl: '+25% Hype por enemigo', getVal: (lvl) => `+${lvl * 25}% Total` },
+    { id: 'expboost', name: 'Acelerador de EXP', desc: 'Aumenta la experiencia ganada.', level: 0, cost: 40, mult: 1.22, maxLevel: 50, sector: 1, cat: 'software', perLvl: '+1% EXP por nivel', getVal: (lvl) => `+${lvl * 1}% Total` },
+    { id: 'dotamp', name: 'Inyector de DoT', desc: 'Aumenta el daño de los efectos de sangrado/DoT.', level: 0, cost: 75, mult: 1.28, maxLevel: 40, sector: 2, cat: 'hardware', perLvl: '+5 Daño de DoT', getVal: (lvl) => `+${lvl * 5} Total` },
+    { id: 'omega_core', name: 'Núcleo Omega', desc: 'Amplifica el daño global de la nave.', level: 0, cost: 500, mult: 1.5, maxLevel: 20, sector: 5, cat: 'hardware', perLvl: '+50% Daño Global', getVal: (lvl) => `+${lvl * 50}% Total` }
+];
+
+const defaultShardShop = [
+    { id: 'ss1', name: 'Sobre-reloj Cuántico', desc: 'Aumenta el daño global un +10% por nivel.', level: 0, cost: 5, mult: 1.8, max: 10 },
+    { id: 'ss2', name: 'Refinería de Hype', desc: 'Aumenta el Hype obtenido un +10% por nivel.', level: 0, cost: 4, mult: 1.7, max: 10 },
+    { id: 'ss3', name: 'Estabilizador Temporal', desc: 'Aumenta +3 segundos al temporizador del enemigo por nivel.', level: 0, cost: 6, mult: 1.9, max: 10 },
+    { id: 'ss4', name: 'Buffer de EXP Neural', desc: 'Aumenta la EXP obtenida un +1% por nivel.', level: 0, cost: 3, mult: 1.5, max: 20 },
+    { id: 'ss5', name: 'Lente de Enfoque Crítico', desc: 'Aumenta la probabilidad crítica un +0.5% por nivel.', level: 0, cost: 8, mult: 2.0, max: 15 },
+    { id: 'ss6', name: 'Compresor de Datos', desc: 'Reduce el costo de las mejoras de hardware/software.', level: 0, cost: 10, mult: 2.2, max: 5 },
+    { id: 'ss7', name: 'Firewall de Descuentos', desc: 'Reduce el costo de mejoras un 12% por nivel.', level: 0, cost: 12, mult: 2.3, max: 5 },
+    { id: 'ss8', name: 'Optimizador de Algoritmo', desc: 'Gana +1 punto de habilidad extra por nivel al subir de nivel.', level: 0, cost: 15, mult: 2.5, max: 5 },
+    { id: 'ss9', name: 'Duplicador de Red', desc: 'Probabilidad del 15% por nivel de duplicar el Hype obtenido.', level: 0, cost: 10, mult: 2.1, max: 5 },
+    { id: 'ss10', name: 'Nanobots de Reparación', desc: 'Reduce un 15% el tiempo de recuperación al huir por nivel.', level: 0, cost: 7, mult: 1.8, max: 5 },
+    { id: 'ss11', name: 'Overclock de Cooldowns', desc: 'Reduce un 10% el CD de las habilidades por nivel.', level: 0, cost: 12, mult: 2.3, max: 5 },
+    { id: 'ss12', name: 'Cristalización Cuántica', desc: 'Aumenta +1 Shard extra al hacer Reencarnación por nivel.', level: 0, cost: 20, mult: 3.0, max: 5 },
+    { id: 'ss13', name: 'Escudo de Respaldo', desc: 'Reduce un 10% la pérdida de Hype/EXP al morir por nivel.', level: 0, cost: 8, mult: 2.0, max: 5 }
+];
+
+const defaultAchievements = [
+    { id: 'ach_clicks', name: 'Clicks de Ataque', desc: 'Realiza clics de ataque en combate.', baseTarget: 50, mult: 3, tier: 1, progress: 0, rewardBase: 5 },
+    { id: 'ach_level', name: 'Veterano de Red', desc: 'Alcanza niveles avanzados con tu personaje.', baseTarget: 10, mult: 2.5, tier: 1, progress: 0, rewardBase: 10 },
+    { id: 'ach_rebirth', name: 'Reinicio Cuántico', desc: 'Realiza reencarnaciones del sistema.', baseTarget: 1, mult: 4, tier: 1, progress: 0, rewardBase: 25 },
+    { id: 'ach_boss', name: 'Purga de Firewall', desc: 'Derrota a Jefes de Sector.', baseTarget: 5, mult: 3, tier: 1, progress: 0, rewardBase: 15 },
+    { id: 'ach_sector', name: 'Explorador Espacial', desc: 'Desbloquea nuevos Sectores avanzados.', baseTarget: 3, mult: 2, tier: 1, progress: 0, rewardBase: 20 },
+    { id: 'ach_bugs', name: 'Cazador de Bugs', desc: 'Derrota subrutinas y enemigos en total.', baseTarget: 50, mult: 4, tier: 1, progress: 0, rewardBase: 10 },
+    { id: 'ach_hype', name: 'Magnate de Hype', desc: 'Acumula Hype en tu inventario.', baseTarget: 1000, mult: 25, tier: 1, progress: 0, rewardBase: 10 }
+];
+
+function getAchievementTarget(ach) {
+    const tier = (ach.tier && !isNaN(ach.tier)) ? ach.tier : 1;
+    const baseTarget = ach.baseTarget || 50;
+    const mult = ach.mult || 3;
+    return Math.round(baseTarget * Math.pow(mult, tier - 1));
+}
+
+function getAchievementReward(ach) {
+    const tier = (ach.tier && !isNaN(ach.tier)) ? ach.tier : 1;
+    const rewardBase = ach.rewardBase || 5;
+    return Math.round(rewardBase * Math.pow(1.5, tier - 1));
+}
+
 function getSectorName(towerNum) {
     if (towerNum === 0) return "Nave Orbital";
     return `Sector ${towerNum}`;
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    injectLightModeStyles();
+    injectLightModeButton();
     const rememberedUser = localStorage.getItem('wizz_remember_user');
     const rememberedPass = localStorage.getItem('wizz_remember_pass');
     if (rememberedUser && rememberedPass) {
@@ -70,6 +164,69 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function injectLightModeStyles() {
+    if (document.getElementById('dynamic-light-mode-css')) return;
+    const style = document.createElement('style');
+    style.id = 'dynamic-light-mode-css';
+    style.innerHTML = `
+        body.light-mode {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        body.light-mode .bg-cyber-bg, 
+        body.light-mode .bg-cyber-panel, 
+        body.light-mode #game-screen,
+        body.light-mode #hero-select-screen,
+        body.light-mode #auth-screen {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        body.light-mode .text-slate-300, 
+        body.light-mode .text-slate-400,
+        body.light-mode .text-slate-200,
+        body.light-mode .text-purple-200,
+        body.light-mode .text-cyan-300 {
+            color: #334155 !important;
+        }
+        body.light-mode .text-white {
+            color: #0f172a !important;
+        }
+        body.light-mode input, body.light-mode select, body.light-mode textarea {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            border-color: #94a3b8 !important;
+        }
+        body.light-mode .text-cyber-neonCyan {
+            color: #0284c7 !important;
+        }
+        body.light-mode .text-cyber-neonYellow {
+            color: #b45309 !important;
+        }
+        body.light-mode .text-cyber-neonPink {
+            color: #be185d !important;
+        }
+        body.light-mode .text-cyber-neonPurple {
+            color: #6d28d9 !important;
+        }
+        body.light-mode .bg-cyber-neonCyan {
+            background-color: #0ea5e9 !important;
+            color: #ffffff !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function injectLightModeButton() {
+    if (document.getElementById('night-mode-toggle-btn')) return;
+    const floatingBtn = document.createElement('button');
+    floatingBtn.id = 'night-mode-toggle-btn';
+    floatingBtn.innerText = "☀️ Modo Claro";
+    floatingBtn.className = "fixed top-3 right-3 z-50 px-3 py-1.5 bg-cyber-panel border border-cyber-border text-slate-300 font-bold text-xs rounded-xl font-orbitron shadow-lg transition active:scale-95 hover:border-cyber-neonCyan";
+    floatingBtn.onclick = toggleLightMode;
+    document.body.appendChild(floatingBtn);
+}
+
 window.addEventListener('keydown', (e) => {
     const isInputTarget = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable);
     
@@ -86,6 +243,24 @@ window.addEventListener('keydown', (e) => {
         return false;
     }
 }, true);
+
+function toggleLightMode() {
+    isLightModeActive = !isLightModeActive;
+    const themeBtn = document.getElementById('night-mode-toggle-btn');
+    if (isLightModeActive) {
+        document.body.classList.add('light-mode');
+        if (themeBtn) {
+            themeBtn.innerText = "🌙 Modo Oscuro";
+            themeBtn.className = "fixed top-3 right-3 z-50 px-3 py-1.5 bg-slate-200 border border-slate-400 text-slate-800 font-bold text-xs rounded-xl font-orbitron shadow-lg transition active:scale-95";
+        }
+    } else {
+        document.body.classList.remove('light-mode');
+        if (themeBtn) {
+            themeBtn.innerText = "☀️ Modo Claro";
+            themeBtn.className = "fixed top-3 right-3 z-50 px-3 py-1.5 bg-cyber-panel border border-cyber-border text-slate-300 font-bold text-xs rounded-xl font-orbitron shadow-lg transition active:scale-95 hover:border-cyber-neonCyan";
+        }
+    }
+}
 
 function showCyberModal(title, message, icon = "⚠️", callback = null) {
     document.getElementById('modal-title').innerText = title;
@@ -221,8 +396,12 @@ function toggleTutorialPref(isChecked) {
     localStorage.setItem('wizz_tutorial_enabled', isChecked ? 'true' : 'false');
 }
 
+// ---------------------------------------------------------------------------
+// FLUJO DE SELECCIÓN DE SLOTS Y CREACIÓN DE PERSONAJE SEPARADO EN 2 PANTALLAS
+// ---------------------------------------------------------------------------
 function openHeroSelector() {
     document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('hero-creation-screen').classList.add('hidden');
     document.getElementById('hero-select-screen').classList.remove('hidden');
     
     const tutorialPref = localStorage.getItem('wizz_tutorial_enabled');
@@ -230,7 +409,9 @@ function openHeroSelector() {
 
     const container = document.getElementById('hero-slots-container');
     container.innerHTML = '';
-    for (let i = 0; i < 3; i++) {
+    
+    // 6 ranuras totales de personajes
+    for (let i = 0; i < 6; i++) {
         const hero = heroesList[i];
         if (hero) {
             const classDef = classDefinitions[hero.class] || classDefinitions['PromptEngineer'];
@@ -253,17 +434,26 @@ function openHeroSelector() {
             `;
         } else {
             container.innerHTML += `
-                <div class="bg-cyber-bg border border-cyber-border border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center">
-                    <span class="text-xl text-slate-600 mb-1">➕</span>
-                    <span class="text-xs text-slate-500 font-medium">Ranura Libre</span>
+                <div onclick="openCharacterCreationForSlot(${i})" class="bg-cyber-bg border border-cyber-border border-dashed hover:border-cyber-neonCyan rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition group">
+                    <span class="text-xl text-slate-600 group-hover:text-cyber-neonCyan mb-1">➕</span>
+                    <span class="text-xs text-slate-500 group-hover:text-cyber-neonCyan font-medium font-orbitron">Ranura ${i + 1}: Crear</span>
                 </div>
             `;
         }
     }
-    if (heroesList.length >= 3) document.getElementById('create-hero-section').classList.add('hidden');
-    else document.getElementById('create-hero-section').classList.remove('hidden');
-    
+}
+
+function openCharacterCreationForSlot(slotIndex) {
+    currentTargetSlot = slotIndex;
+    document.getElementById('hero-select-screen').classList.add('hidden');
+    document.getElementById('hero-creation-screen').classList.remove('hidden');
     selectClass('PromptEngineer');
+}
+
+function cancelCharacterCreation() {
+    currentTargetSlot = -1;
+    document.getElementById('hero-creation-screen').classList.add('hidden');
+    openHeroSelector();
 }
 
 function confirmDeleteHero(index) {
@@ -287,7 +477,62 @@ function selectClass(className) {
                 : "class-btn p-2 rounded-xl border border-cyber-border bg-cyber-bg text-slate-400 text-[10px] font-bold font-orbitron transition text-center truncate";
         }
     });
-    document.getElementById('class-description-box').innerHTML = classDescriptions[className] || classDescriptions['PromptEngineer'];
+
+    const loreInfo = classLoreData[className] || classLoreData['PromptEngineer'];
+    const descBox = document.getElementById('class-description-box');
+    
+    // Generar Gráfico de Radar (Pentágono SVG con vértices: DoT, Click, Crit, CD, Recursos)
+    const stats = loreInfo.stats; // valores de 1 a 5
+    // Coordenadas de un pentágono regular con radio 45 centrado en (50, 50)
+    // Ángulos: -90° (arriba), -18°, 54°, 126°, 198°
+    const getPoint = (val, index) => {
+        const angle = (Math.PI * 2 / 5) * index - Math.PI / 2;
+        const r = (val / 5) * 42;
+        const x = 50 + r * Math.cos(angle);
+        const y = 50 + r * Math.sin(angle);
+        return `${x},${y}`;
+    };
+
+    const polyPoints = [
+        getPoint(stats.dot, 0),
+        getPoint(stats.click, 1),
+        getPoint(stats.crit, 2),
+        getPoint(stats.cd, 3),
+        getPoint(stats.recursos, 4)
+    ].join(' ');
+
+    descBox.innerHTML = `
+        <div class="space-y-3">
+            <div class="flex flex-col sm:flex-row items-center gap-4 bg-cyber-bg p-3 rounded-xl border border-cyber-border">
+                <div class="w-28 h-28 relative flex items-center justify-center flex-shrink-0">
+                    <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible">
+                        <!-- Red de fondo del pentágono -->
+                        <polygon points="50,8 89,37 74,82 26,82 11,37" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="2"/>
+                        <polygon points="50,23 70,38 62,64 38,64 30,38" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="2"/>
+                        <!-- Ejes -->
+                        <line x1="50" y1="50" x2="50" y2="8" stroke="#334155" stroke-width="1"/>
+                        <line x1="50" y1="50" x2="89" y2="37" stroke="#334155" stroke-width="1"/>
+                        <line x1="50" y1="50" x2="74" y2="82" stroke="#334155" stroke-width="1"/>
+                        <line x1="50" y1="50" x2="26" y2="82" stroke="#334155" stroke-width="1"/>
+                        <line x1="50" y1="50" x2="11" y2="37" stroke="#334155" stroke-width="1"/>
+                        <!-- Polígono de Estadísticas -->
+                        <polygon points="${polyPoints}" fill="rgba(0, 240, 255, 0.35)" stroke="#00f0ff" stroke-width="2"/>
+                        <!-- Etiquetas de los 5 Vértices -->
+                        <text x="50" y="2" font-size="7" fill="#9d00ff" text-anchor="middle" font-family="Orbitron" font-weight="bold">DoT</text>
+                        <text x="96" y="36" font-size="7" fill="#00f0ff" text-anchor="start" font-family="Orbitron" font-weight="bold">Click</text>
+                        <text x="78" y="93" font-size="7" fill="#ff9900" text-anchor="start" font-family="Orbitron" font-weight="bold">Crít</text>
+                        <text x="22" y="93" font-size="7" fill="#00f0ff" text-anchor="end" font-family="Orbitron" font-weight="bold">CD</text>
+                        <text x="3" y="36" font-size="7" fill="#f3e600" text-anchor="end" font-family="Orbitron" font-weight="bold">Rec.</text>
+                    </svg>
+                </div>
+                <div>
+                    <h5 class="font-orbitron font-bold text-cyber-neonCyan text-xs">${loreInfo.name}</h5>
+                    <div class="text-[10px] text-slate-300 italic mb-1">${loreInfo.role}</div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">${loreInfo.lore}</p>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function createNewHero() {
@@ -296,6 +541,12 @@ function createNewHero() {
     const name = nameInput.value.trim();
     if (!name) { errBox.innerText = "⚠️ Ingresa un nombre válido."; errBox.classList.remove('hidden'); return; }
     
+    if (currentTargetSlot < 0 || currentTargetSlot >= 6) {
+        errBox.innerText = "⚠️ Selecciona una ranura válida.";
+        errBox.classList.remove('hidden');
+        return;
+    }
+
     checkGlobalHeroNameUnique(name, isUnique => {
         if (!isUnique) {
             errBox.innerText = "❌ El nombre ya está registrado globalmente.";
@@ -324,10 +575,13 @@ function createNewHero() {
             shardShop: JSON.parse(JSON.stringify(defaultShardShop)),
             achievements: JSON.parse(JSON.stringify(defaultAchievements))
         };
-        heroesList.push(newHero);
+        
+        heroesList[currentTargetSlot] = newHero;
         rdb.ref('users/' + currentUser + '/heroes').set(heroesList).then(() => {
             nameInput.value = '';
-            loadHero(heroesList.length - 1);
+            const assignedSlot = currentTargetSlot;
+            currentTargetSlot = -1;
+            loadHero(assignedSlot);
         });
     });
 }
@@ -362,12 +616,54 @@ function loadHero(index) {
     if (gameData.tutorialSeenFirstTravel === undefined) gameData.tutorialSeenFirstTravel = false;
     if (gameData.tutorialSeenDeath === undefined) gameData.tutorialSeenDeath = false;
     if (gameData.tutorialSeenSectors === undefined) gameData.tutorialSeenSectors = false;
-    if (!gameData.shardShop) gameData.shardShop = JSON.parse(JSON.stringify(defaultShardShop));
-    if (!gameData.achievements) gameData.achievements = JSON.parse(JSON.stringify(defaultAchievements));
+    
+    if (!gameData.shardShop) {
+        gameData.shardShop = JSON.parse(JSON.stringify(defaultShardShop));
+    } else {
+        defaultShardShop.forEach(def => {
+            if (!gameData.shardShop.some(s => s.id === def.id)) {
+                gameData.shardShop.push(JSON.parse(JSON.stringify(def)));
+            }
+        });
+    }
+
+    if (!gameData.upgrades) {
+        gameData.upgrades = JSON.parse(JSON.stringify(defaultUpgrades));
+    } else {
+        defaultUpgrades.forEach(def => {
+            const existing = gameData.upgrades.find(u => u.id === def.id);
+            if (!existing) {
+                gameData.upgrades.push(JSON.parse(JSON.stringify(def)));
+            } else {
+                if (!existing.perLvl) existing.perLvl = def.perLvl;
+                if (!existing.getVal) existing.getVal = def.getVal;
+            }
+        });
+    }
+    
+    // Fallback robusto para evitar NaN en logros antiguos
+    if (!gameData.achievements || gameData.achievements.length === 0) {
+        gameData.achievements = JSON.parse(JSON.stringify(defaultAchievements));
+    } else {
+        defaultAchievements.forEach(def => {
+            const found = gameData.achievements.find(e => e.id === def.id);
+            if (!found) {
+                gameData.achievements.push(JSON.parse(JSON.stringify(def)));
+            } else {
+                if (found.tier === undefined || isNaN(found.tier)) found.tier = 1;
+                if (found.progress === undefined || isNaN(found.progress)) found.progress = 0;
+                if (!found.baseTarget) found.baseTarget = def.baseTarget;
+                if (!found.mult) found.mult = def.mult;
+                if (!found.rewardBase) found.rewardBase = def.rewardBase;
+            }
+        });
+    }
+
     if (gameData.critDmgMult === undefined) gameData.critDmgMult = 1.5;
     if (gameData.dotDamage === undefined) gameData.dotDamage = 0;
 
     document.getElementById('hero-select-screen').classList.add('hidden');
+    document.getElementById('hero-creation-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
     document.getElementById('anchor-ship-checkbox').checked = gameData.anchorShip;
     initGameSession();
@@ -375,14 +671,15 @@ function loadHero(index) {
     checkTutorialOnLoad();
 }
 
+// Daño base inicial ajustado exactamente a 10
 function calculateBaseDamage() {
-    if (!gameData) return 15;
+    if (!gameData) return 10;
     const charLevel = gameData.level || 1;
-    return 15 + (charLevel * 3.5);
+    return 10 + (charLevel * 3.5);
 }
 
 function calculateTotalDamage(skillMultiplier = 1.0) {
-    if (!gameData) return 15;
+    if (!gameData) return 10;
     
     const dBase = calculateBaseDamage();
     const statsEquipo = gameData.damage || 0; 
@@ -390,7 +687,7 @@ function calculateTotalDamage(skillMultiplier = 1.0) {
     let sumaPasivasPorcentaje = 0;
     if (gameData.shardShop) {
         const ss1 = gameData.shardShop.find(x => x.id === 'ss1');
-        if (ss1) sumaPasivasPorcentaje += (ss1.level * 0.25);
+        if (ss1) sumaPasivasPorcentaje += (ss1.level * 0.10);
     }
     if (gameData.upgrades) {
         const omega = gameData.upgrades.find(u => u.id === 'omega_core');
@@ -422,6 +719,7 @@ function applyOrRefreshDoT(skillNode, calculatedDamage) {
             damagePerTick: Math.floor(calculatedDamage / duration)
         });
     }
+    checkAchievementProgress('ach_bugs', 1);
     renderGlobalDots();
 }
 
@@ -525,7 +823,7 @@ function renderNaveStats() {
     let globalDmgMulti = 1;
     if (gameData.shardShop) {
         const ss1 = gameData.shardShop.find(x => x.id === 'ss1');
-        if (ss1) globalDmgMulti += (ss1.level * 0.25);
+        if (ss1) globalDmgMulti += (ss1.level * 0.10);
     }
     if (gameData.upgrades) {
         const omega = gameData.upgrades.find(u => u.id === 'omega_core');
@@ -548,6 +846,10 @@ function renderNaveStats() {
     if (gameData.upgrades) {
         const goldUp = gameData.upgrades.find(u => u.id === 'gold1');
         if (goldUp) hypeBonus += (goldUp.level * 25);
+    }
+    if (gameData.shardShop) {
+        const ss2 = gameData.shardShop.find(x => x.id === 'ss2');
+        if (ss2) hypeBonus += (ss2.level * 10);
     }
 
     let expBonus = 0;
@@ -577,16 +879,18 @@ function spawnEnemy() {
     updateNavTabVisuals(isNave);
     renderGlobalDots();
 
-    let timeMultiplier = 1;
+    let bonusTimeSecs = 0;
     if (gameData.shardShop) {
         const ss3 = gameData.shardShop.find(x => x.id === 'ss3');
-        if (ss3) timeMultiplier = Math.max(0.4, 1 - (ss3.level * 0.08));
+        if (ss3) bonusTimeSecs = ss3.level * 3;
     }
+
     const multiplier = isNave ? 1 : Math.pow(1.3, gameData.currentTower - 1) * Math.pow(1.15, gameData.currentStage - 1);
     enemyMaxHp = isNave ? 50 : Math.floor((isBoss ? 180 : 45) * multiplier);
     enemyHp = enemyMaxHp;
     
-    enemyTimer = isNave ? 999 : Math.max(5, Math.floor((isBoss ? 30 : 10) * timeMultiplier));
+    const baseTimer = isNave ? 999 : (isBoss ? 30 : 10);
+    enemyTimer = isNave ? 999 : (baseTimer + bonusTimeSecs);
     document.getElementById('enemy-timer-display').innerText = enemyTimer;
 
     bossFightActive = isBoss;
@@ -1079,7 +1383,7 @@ function handleTap(event) {
 
     damageEnemy(finalTapDmg, isCrit, false);
     showFloatingDmg(event, (isCrit ? '💥 CRIT! +' : '+') + finalTapDmg, isCrit);
-    checkAchievementProgress('ach1', 1);
+    checkAchievementProgress('ach_clicks', 1);
 }
 
 function damageEnemy(amount, isCrit = false, isDot = false) {
@@ -1142,7 +1446,7 @@ function defeatEnemy() {
     }
     if (gameData.shardShop) {
         const ss2 = gameData.shardShop.find(x => x.id === 'ss2');
-        if (ss2) hypeMulti += (ss2.level * 0.4);
+        if (ss2) hypeMulti += (ss2.level * 0.10);
     }
 
     const isBoss = (gameData.currentStage === 10);
@@ -1169,8 +1473,10 @@ function defeatEnemy() {
 
     showRewardPopups(earnedHype, earnedExp);
 
-    checkAchievementProgress('ach7', gameData.gold);
-    if (isBoss) checkAchievementProgress('ach4', 1);
+    checkAchievementProgress('ach_bugs', 1);
+    checkAchievementProgress('ach_hype', gameData.gold, true);
+
+    if (isBoss) checkAchievementProgress('ach_boss', 1);
 
     if (gameData.exp >= gameData.maxExp) {
         gameData.level++;
@@ -1183,8 +1489,8 @@ function defeatEnemy() {
             if (ss8) extraPoints += ss8.level;
         }
         gameData.skillPoints += extraPoints;
-        checkAchievementProgress('ach2', gameData.level);
-        checkAchievementProgress('ach8', gameData.level);
+        
+        checkAchievementProgress('ach_level', gameData.level, true);
     }
 
     if (!gameData.anchorShip) {
@@ -1204,7 +1510,8 @@ function defeatEnemy() {
     gameData.lastActiveTower = gameData.currentTower;
     gameData.lastActiveStage = gameData.currentStage;
 
-    checkAchievementProgress('ach5', gameData.maxUnlockedTower);
+    checkAchievementProgress('ach_sector', gameData.maxUnlockedTower, true);
+
     spawnEnemy();
     updateUI();
     saveGameToCloud();
@@ -1357,6 +1664,64 @@ function switchShardTab(subCat) {
         }
     });
     if (subCat === 'shop') renderShardShop();
+    else if (subCat === 'exchange') renderShardExchange();
+}
+
+function renderShardExchange() {
+    const container = document.getElementById('shard-subcontent-exchange');
+    if (!container) return;
+    
+    let ratePerShard = 500 * Math.max(1, gameData.maxUnlockedTower);
+    let currentShards = gameData.crystals || 0;
+
+    container.innerHTML = `
+        <div class="bg-cyber-panel border border-cyber-border rounded-2xl p-4 text-center space-y-3">
+            <h4 class="font-orbitron font-bold text-cyber-neonYellow text-sm">🔄 Mercado Negro de Shards</h4>
+            <p class="text-xs text-slate-300">Vende tus Microchips (Shards ⚛️) a cambio de capital digital de Hype para acelerar tus compras.</p>
+            <div class="py-2 bg-cyber-bg rounded-xl border border-cyber-border flex justify-around items-center text-xs">
+                <div>Tus Shards: <strong class="text-cyber-neonPurple">${currentShards} ⚛️</strong></div>
+                <div>Valor Unitario: <strong class="text-[#f3e600]">+${ratePerShard} Hype</strong></div>
+            </div>
+            <div class="flex items-center space-x-2 justify-center">
+                <span class="text-xs text-slate-300 font-orbitron">Cantidad:</span>
+                <input type="number" id="shard-sell-qty-input" min="1" max="${Math.max(1, currentShards)}" value="1" class="w-16 bg-cyber-bg border border-cyber-border rounded-lg px-2 py-1 text-xs text-center text-white font-orbitron" />
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="setShardSellQty(1)" class="py-1.5 bg-cyber-bg border border-cyber-border text-slate-300 font-bold rounded-xl text-xs font-orbitron active:scale-95">1</button>
+                <button onclick="setShardSellQty(5)" class="py-1.5 bg-cyber-bg border border-cyber-border text-slate-300 font-bold rounded-xl text-xs font-orbitron active:scale-95">5</button>
+                <button onclick="setShardSellQty(${currentShards})" class="py-1.5 bg-cyber-bg border border-cyber-border text-slate-300 font-bold rounded-xl text-xs font-orbitron active:scale-95">Todo (${currentShards})</button>
+            </div>
+            <button onclick="sellShardsForHype(${ratePerShard})" class="w-full py-2.5 bg-gradient-to-r from-cyber-neonYellow to-amber-500 text-black font-extrabold font-orbitron rounded-xl text-xs shadow hover:opacity-90 transition active:scale-95">Vender Shards Seleccionados</button>
+        </div>
+    `;
+}
+
+function setShardSellQty(qty) {
+    const input = document.getElementById('shard-sell-qty-input');
+    if (input) {
+        const currentShards = gameData.crystals || 0;
+        input.value = Math.max(1, Math.min(qty, currentShards));
+    }
+}
+
+function sellShardsForHype(ratePerShard) {
+    const input = document.getElementById('shard-sell-qty-input');
+    const qty = parseInt(input ? input.value : 1) || 1;
+    const currentShards = gameData.crystals || 0;
+
+    if (qty <= 0 || currentShards < qty) {
+        showCyberModal("SHARDS INSUFICIENTES", "No tienes suficientes Microchips para realizar esta venta.", "⚠️");
+        return;
+    }
+
+    gameData.crystals -= qty;
+    const totalHypeGained = qty * ratePerShard;
+    gameData.gold += totalHypeGained;
+
+    updateUI();
+    renderShardExchange();
+    saveGameToCloud();
+    showSkillActionEffect("¡VENTA EXITOSA!", "yellow", `+${totalHypeGained} Hype (${qty} ⚛️)`);
 }
 
 function updateUI() {
@@ -1380,7 +1745,7 @@ function updateUI() {
     const badgeSkills = document.getElementById('badge-Skills');
     if (gameData.skillPoints > 0) badgeSkills.classList.remove('hidden'); else badgeSkills.classList.add('hidden');
 
-    let hasClaimable = gameData.achievements.some(a => !a.claimed && a.progress >= a.target);
+    let hasClaimable = gameData.achievements.some(a => a.progress >= getAchievementTarget(a));
     const badgeLogros = document.getElementById('badge-Logros');
     if (hasClaimable) badgeLogros.classList.remove('hidden'); else badgeLogros.classList.add('hidden');
 }
@@ -1438,7 +1803,6 @@ function getCalculatedSkillTooltip(node, showNextLevel = false) {
         let currentTotalBonus = currentLvl > 0 ? (currentLvl * increment) : 0;
         let maxTotalBonus = node.max * increment;
 
-        // Descripciones temáticas para explicar el incremento de daño sin duplicar números
         const passiveDescriptions = {
             'pe_p1': 'Optimiza los búferes de entrada para amplificar la potencia base de cada comando ejecutado en la red.',
             'pe_p2': 'Calibra los ciclos de procesamiento frontal para elevar la frecuencia y solidez de impacto por clic.',
@@ -1502,7 +1866,6 @@ function getCalculatedSkillTooltip(node, showNextLevel = false) {
         : `<div style="color:#f3e600; font-weight:bold; margin-bottom: 4px; font-size: 10px;">Habilidad activa (${scalingPct}% Daño directo)</div>`;
 
     let template = node.descTemplate || node.desc || '';
-    // Limpiar menciones redundantes de Tier y CD en el texto descriptivo
     template = template.replace(/\s*\([^)]*Tier[^)]*\)/gi, '');
     template = template.replace(/\s*\([^)]*CD:[^)]*\)/gi, '');
     template = template.replace(/,\s*CD:\s*\d+s/gi, '');
@@ -1622,13 +1985,7 @@ function getAllActiveNodesList() {
     classDef.branches.forEach(b => {
         b.nodes.forEach(n => {
             if (n.type === 'active' && (gameData.unlockedSkills[n.id] || 0) > 0) {
-                let lvl = gameData.unlockedSkills[n.id];
-                let scalingMultiplier = n.scalingMultiplier !== undefined ? n.scalingMultiplier : 1.0;
-                let calculatedDmg = n.baseDmg ? (n.baseDmg + (lvl - 1) * (n.scalingDmg * scalingMultiplier)) : null;
                 let clonedNode = { ...n };
-                if (calculatedDmg) {
-                    clonedNode.dotDmg = calculatedDmg;
-                }
                 activeNodes.push(clonedNode);
             }
         });
@@ -1695,15 +2052,16 @@ function useEquippedSkill(slotIndex) {
     updateCooldownsUI();
 
     let currentLvl = gameData.unlockedSkills[matchedNode.id] || 1;
-    let baseVal = matchedNode.dotDmg || matchedNode.baseDmg || matchedNode.baseVal || 10;
-    let scalingVal = matchedNode.scalingDmg || matchedNode.scaling || 5;
+    let baseVal = matchedNode.baseVal || matchedNode.baseDmg || 10;
+    let scalingVal = matchedNode.scaling || matchedNode.scalingDmg || 5;
     let scalingMultiplier = matchedNode.scalingMultiplier !== undefined ? matchedNode.scalingMultiplier : 1.0;
-    let rawVal = Math.round(baseVal + (currentLvl - 1) * (scalingVal * scalingMultiplier));
+    let rawVal = Math.round(baseVal + Math.max(0, currentLvl - 1) * (scalingVal * scalingMultiplier));
 
     let skillDmg = 0;
     if (matchedNode.dotTicks || matchedNode.stat === 'dot') {
         let currentDotVal = gameData.dotDamage || 0;
-        skillDmg = Math.floor(rawVal + Math.round(currentDotVal * scalingMultiplier));
+        let scaledDotContrib = Math.round(currentDotVal * scalingMultiplier);
+        skillDmg = Math.floor(rawVal + scaledDotContrib);
         applyOrRefreshDoT(matchedNode, skillDmg);
         showSkillActionEffect(matchedNode.name + " (DoT Acumulado)", matchedNode.colorType || 'violet', skillDmg);
     } else if (matchedNode.stat === 'crit' || matchedNode.stat === 'hype') {
@@ -1712,7 +2070,8 @@ function useEquippedSkill(slotIndex) {
         damageEnemy(skillDmg);
     } else {
         let currentBaseVal = calculateTotalDamage(1.0);
-        skillDmg = Math.floor(rawVal + Math.round(currentBaseVal * scalingMultiplier));
+        let scaledBaseContrib = Math.round(currentBaseVal * scalingMultiplier);
+        skillDmg = Math.floor(rawVal + scaledBaseContrib);
         if (matchedNode.mult) {
             skillDmg = calculateTotalDamage(matchedNode.mult);
         }
@@ -1904,6 +2263,9 @@ function switchUpgradeTab(cat) {
     renderUpgrades();
 }
 
+// ---------------------------------------------------------------------------
+// RENDERIZADO DE MEJORAS: Muestra incremento por nivel y valor acumulado total
+// ---------------------------------------------------------------------------
 function renderUpgrades() {
     const container = document.getElementById('upgrades-list');
     if (!container) return;
@@ -1926,12 +2288,20 @@ function renderUpgrades() {
 
         let nameClass = (!canAfford && !isMaxed) ? 'text-slate-500' : 'text-cyber-neonCyan';
 
+        // Detalle de aumento por nivel y acumulado
+        const perLvlText = up.perLvl ? `• Por nivel: <span class="text-cyber-neonYellow">${up.perLvl}</span>` : '';
+        const accumulatedText = up.getVal ? `• Acumulado actual: <span class="text-cyber-neonCyan font-bold">${up.getVal(up.level)}</span>` : `• Nivel: ${up.level}`;
+
         container.innerHTML += `
             <div class="bg-cyber-panel border ${isUnlockedForSector ? 'border-cyber-border' : 'border-red-900/50 opacity-60'} rounded-2xl p-3.5 flex justify-between items-center text-xs">
-                <div>
+                <div class="space-y-1">
                     <div class="font-bold ${nameClass} font-orbitron text-xs">${up.name} (Nv. ${up.level} ${maxLevelText})</div>
-                    <div class="text-xs text-slate-400 mt-0.5">${colorizeDescription(up.desc)}</div>
-                    ${!isUnlockedForSector ? `<div class="text-[10px] text-red-400 mt-0.5">🔒 Requiere Sector ${up.sector}</div>` : ''}
+                    <div class="text-xs text-slate-400">${colorizeDescription(up.desc)}</div>
+                    <div class="text-[10px] text-slate-300 flex flex-wrap gap-x-3 gap-y-0.5">
+                        ${perLvlText}
+                        ${accumulatedText}
+                    </div>
+                    ${!isUnlockedForSector ? `<div class="text-[10px] text-red-400">🔒 Requiere Sector ${up.sector}</div>` : ''}
                 </div>
                 <button onclick="buyUpgrade(${originalIndex})" ${isMaxed || !isUnlockedForSector ? 'disabled' : ''} class="px-3 py-1.5 rounded-xl font-bold text-xs font-orbitron transition ${isMaxed || !isUnlockedForSector ? 'bg-cyber-bg text-slate-500' : (canAfford ? 'bg-cyber-neonCyan text-black shadow-neon-cyan' : 'bg-cyber-bg/50 text-slate-600 border border-cyber-border cursor-not-allowed opacity-50')}">
                     ${isMaxed ? 'Máximo' : currentCost + ' Hype'}
@@ -2048,8 +2418,7 @@ function triggerRebirth() {
     gameData.equippedSkills = [starterKey, null, null, null, null];
     gameData.upgrades = JSON.parse(JSON.stringify(defaultUpgrades));
 
-    checkAchievementProgress('ach3', 1);
-    checkAchievementProgress('ach9', gameData.crystals);
+    checkAchievementProgress('ach_rebirth', gameData.rebirths, true);
     updateUI();
     renderNaveStats();
     switchTab('Batalla');
@@ -2061,36 +2430,51 @@ function renderAchievements() {
     const container = document.getElementById('achievements-list');
     if (!container) return;
     container.innerHTML = '';
+    
+    if (!gameData.achievements) gameData.achievements = JSON.parse(JSON.stringify(defaultAchievements));
+
     gameData.achievements.forEach((ach, idx) => {
-        const canClaim = !ach.claimed && ach.progress >= ach.target;
+        const target = getAchievementTarget(ach);
+        const reward = getAchievementReward(ach);
+        const canClaim = ach.progress >= target;
+
         container.innerHTML += `
             <div class="bg-cyber-panel border border-cyber-border rounded-2xl p-3 flex items-center justify-between">
                 <div>
-                    <div class="font-bold text-xs text-cyber-neonYellow font-orbitron">${ach.name} (+${ach.rewardCrystals} <i class="fa-solid fa-microchip"></i>)</div>
-                    <div class="text-xs text-slate-400 mt-0.5">${ach.desc} (${Math.min(ach.progress, ach.target)}/${ach.target})</div>
+                    <div class="font-bold text-xs text-cyber-neonYellow font-orbitron">${ach.name} (Tier ${ach.tier}) (+${reward} <i class="fa-solid fa-microchip"></i>)</div>
+                    <div class="text-xs text-slate-400 mt-0.5">${ach.desc} (${Math.min(ach.progress, target)} / ${target})</div>
                 </div>
-                <button onclick="claimAchievement(${idx})" ${ach.claimed || !canClaim ? 'disabled' : ''} class="px-3 py-1 rounded-xl font-bold text-xs font-orbitron transition ${ach.claimed ? 'bg-cyber-bg text-slate-500' : (canClaim ? 'bg-cyber-neonCyan text-black shadow-neon-cyan animate-pulse' : 'bg-cyber-bg text-slate-500')}">
-                    ${ach.claimed ? 'Listos' : 'Reclamar'}
+                <button onclick="claimAchievement(${idx})" ${!canClaim ? 'disabled' : ''} class="px-3 py-1 rounded-xl font-bold text-xs font-orbitron transition ${canClaim ? 'bg-cyber-neonCyan text-black shadow-neon-cyan animate-pulse' : 'bg-cyber-bg text-slate-500 cursor-not-allowed opacity-50'}">
+                    ${canClaim ? 'Reclamar' : 'En Progreso'}
                 </button>
             </div>
         `;
     });
 }
 
-function checkAchievementProgress(achId, value) {
+function checkAchievementProgress(achId, value, isAbsolute = false) {
     if (!gameData || !gameData.achievements) return;
     const ach = gameData.achievements.find(a => a.id === achId);
-    if (ach && !ach.claimed) {
-        ach.progress = Math.max(ach.progress, value);
+    if (ach) {
+        if (isAbsolute) {
+            ach.progress = Math.max(ach.progress, value);
+        } else {
+            ach.progress += value;
+        }
     }
 }
 
 function claimAchievement(idx) {
     const ach = gameData.achievements[idx];
-    if (ach.claimed || ach.progress < ach.target) return;
-    ach.claimed = true;
-    gameData.crystals = (gameData.crystals || 0) + ach.rewardCrystals;
-    checkAchievementProgress('ach9', gameData.crystals);
+    const target = getAchievementTarget(ach);
+    if (ach.progress < target) return;
+
+    const reward = getAchievementReward(ach);
+    gameData.crystals = (gameData.crystals || 0) + reward;
+    
+    // Auto-generativo: incrementa el tier para la siguiente meta
+    ach.tier++;
+
     updateUI();
     renderNaveStats();
     renderAchievements();
@@ -2127,7 +2511,7 @@ function loadGlobalRanking() {
         });
         listEl.innerHTML = '';
         rankings.slice(0, 10).forEach((r, idx) => {
-            listEl.innerHTML += `
+            let list_el_item = `
                 <div class="flex items-center justify-between p-2.5 bg-cyber-bg rounded-xl border border-cyber-border">
                     <div class="flex items-center space-x-2.5">
                         <span class="font-bold text-cyber-neonYellow font-orbitron text-sm">#${idx + 1}</span>
@@ -2142,6 +2526,7 @@ function loadGlobalRanking() {
                     </div>
                 </div>
             `;
+            listEl.innerHTML += list_el_item;
         });
     });
 }
